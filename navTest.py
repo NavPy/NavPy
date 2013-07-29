@@ -2,6 +2,7 @@
 import nav
 import unittest
 import numpy as np
+assert_almost_equal = np.testing.assert_almost_equal
 
 """
 Tests to Add
@@ -137,6 +138,84 @@ class TestNavClass(unittest.TestCase):
         
         for e1, e2 in zip(lla_computed, [lat, lon, alt]):
             self.assertAlmostEqual(e1, e2, places=9)   
+            
+    def test_omega2rates_trivial(self):
+        """
+        Test conversion of pqr to Euler angle rates.  
+        Trivial case: pitch and roll are zero
+        
+        Data Source: Example generated using book GNSS Applications and Methods
+                     Chapter 7 library function: omega2rates.m
+        """
+        # Test trivial case where pitch and roll are zero
+        ## Under the default roll_pitch_yaw order
+        R_expected = np.array([
+                     [1,0,0],
+                     [0,1,0],
+                     [0,0,1]])
+        R_computed = nav.omega2rates(0, 0)
+        self.assertTrue((R_expected == R_computed).all())
+        
+        ## ... and when order is yaw_pitch_roll
+        R_expected = np.array([
+                     [0,0,1],
+                     [0,1,0],
+                     [1,0,0]])
+        R_computed = nav.omega2rates(0, 0, euler_angles_order='yaw_pitch_roll')
+        self.assertTrue((R_expected == R_computed).all())
+        
+    def test_omega2rates_units(self):
+        """
+        Test conversion of pqr to Euler angle rates.  
+        Ensure both inputs as radians and degrees work.
+        
+        Data Source: Example generated using book GNSS Applications and Methods
+                     Chapter 7 library function: omega2rates.m
+        """
+        pitch_deg, roll_deg = 30, -3
+        pitch_rad, roll_rad = np.radians(pitch_deg), np.radians(roll_deg)
+        # Test default case of radians       
+        ## Under the default roll_pitch_yaw order
+        R_expected = np.array([
+                     [1, -0.0302162,   0.5765590],
+                     [0,  0.9986295,   0.0523360],
+                     [0, -0.0604324,   1.1531181]])
+        R_computed = nav.omega2rates(pitch_rad, roll_rad)
+        np.testing.assert_almost_equal(R_expected, R_computed)
+        
+        ## ... and when input is in degrees.
+        R_computed = nav.omega2rates(pitch_deg, roll_deg, input_units='deg')
+        np.testing.assert_almost_equal(R_expected, R_computed)
+        
+        ## ... and when order is yaw_pitch_roll
+        R_expected = np.array([R_expected[2,:], 
+                               R_expected[1,:], 
+                               R_expected[0,:]])
+        R_computed = nav.omega2rates(pitch_rad, roll_rad, euler_angles_order='yaw_pitch_roll')
+        np.testing.assert_almost_equal(R_expected, R_computed)
+        
+    def test_omega2rates_singularities(self):
+        """
+        Test conversion of pqr to Euler angle rates.
+        Ensure NaN returned and (user warned) when operating near singularities.
+        """
+        pitch_rad, roll_rad = np.radians(89), np.radians(-3)
+        # Test near, but not at, singularity
+        ## Under the default roll_pitch_yaw order
+        R_expected = np.array([
+                     [1, -2.9983249,   57.2114477],
+                     [0,  0.9986295,    0.0523360],
+                     [0, -2.9987817,   57.2201626]])
+        R_computed = nav.omega2rates(pitch_rad, roll_rad)
+        np.testing.assert_almost_equal(R_expected, R_computed)
+        
+        # Test singlarity and ensure NaN returned
+        pitch_rad, roll_rad = np.radians(89.6), np.radians(-3)
+        # Test near, but not at, singularity
+        R_computed = nav.omega2rates(pitch_rad, roll_rad)
+        self.assertTrue(R_computed is np.nan)        
+                               
+            
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestNavClass)
     unittest.TextTestRunner(verbosity=2).run(suite)    
