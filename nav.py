@@ -479,7 +479,7 @@ def sk(w):
 	
 	May 10 - Fix syntax error
 	"""
-	C=numpy.array([[0.0, -w[2], w[1]], [w[2], 0.0, -w[0]], [-w[1], w[0], 0.0]]);
+	C=numpy.matrix([[0.0, -w[2], w[1]], [w[2], 0.0, -w[0]], [-w[1], w[0], 0.0]]);
 	
 	return C;
 

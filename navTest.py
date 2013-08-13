@@ -265,6 +265,17 @@ class TestNavClass(unittest.TestCase):
         Rnav2body_computed = nav.angle2dcm(yaw_deg, pitch_deg, roll_deg, input_units='deg')
         np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
         
+    def test_sk(self):
+        """
+        Test formation of skew symmetric matrix.
+        """
+        rho = np.array([1, 2, 3])      
+        rho_x_expected = np.matrix([[     0 , -rho[2],  rho[1]],
+                                    [ rho[2],      0 , -rho[0]],
+                                    [-rho[1],  rho[0],      0 ]])
+                                    
+        np.testing.assert_almost_equal(rho_x_expected, nav.sk(rho))
+        
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestNavClass)
     unittest.TextTestRunner(verbosity=2).run(suite)    
