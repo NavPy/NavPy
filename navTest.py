@@ -215,7 +215,29 @@ class TestNavClass(unittest.TestCase):
         R_computed = nav.omega2rates(pitch_rad, roll_rad)
         self.assertTrue(R_computed is np.nan)        
                                
-            
+    def test_wrap_pi(self):
+        """
+        Test wrapping angles to [-PI, PI]
+
+        Data Source: Example generated using book GNSS Applications and Methods
+             Chapter 7 library function: unwrapyaw.m
+        """
+        
+        angles1 = np.radians([0, 3, 175,  179,  180.1, 189,  190, 250,  380])
+        angles2 = np.radians([0, 3, 175, -179, -180.1, 189, -190, 250, -380])
+        
+        angles1_wrap_expected = [0.0, 0.05236, 3.05433,  3.12414, -3.13985, -2.98451, -2.96706, -1.91986,  0.34907]
+        angles2_wrap_expected = [0.0, 0.05236, 3.05433, -3.12414,  3.13985, -2.98451,  2.96706, -1.91986, -0.34907]
+        
+        # Current problem: Demoz converts +/- 180 degrees to +pi
+        
+        np.testing.assert_almost_equal(angles1_wrap_expected, nav.wrap_pi(angles1), decimal=5)
+        np.testing.assert_almost_equal(angles2_wrap_expected, nav.wrap_pi(angles2), decimal=5)
+        
+        # Boundry Conditions - current implementation is kinda unintuitive for boundry
+        # conditions.  These tests can be added later to impose desired behavior
+        #self.assertAlmostEqual( np.pi, nav.wrap_pi( np.pi))
+        #self.assertAlmostEqual(-np.pi, nav.wrap_pi(-np.pi))
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestNavClass)
     unittest.TextTestRunner(verbosity=2).run(suite)    

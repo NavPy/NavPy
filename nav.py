@@ -486,7 +486,27 @@ def ortho(C):
 	C_ortho = numpy.concatenate((w1,w2,w3),axis=1);
 	return C_ortho
 	
-
+def wrap_pi(angles_rad):
+    """
+    Wrap radian angles to [-PI, +PI].
+    
+    Parameters
+    ----------
+    angle: input angles (list or np.array, units: radians)
+    
+    Returns
+    -------
+    wrapped_angle: angles wrapped to [-PI, +PI] (np.array, units: radians)
+    
+    Based on Adhika Lie wrapToPi.m 1/16/13 function.
+    
+    Note
+    ----
+    Care is needed at boundries.  For example, current function will wrap both
+    +/- PI to -PI.  Possible future implementations may be improved to better
+    handle boundry cases. 
+    """
+    return np.mod(angles_rad+np.pi, 2.0 * np.pi) - np.pi
 ########################## TEST SCRIPT #################################
 #lla = numpy.array([50*pi/180, -93*pi/180, 12132.124]);
 #ecef = lla2ecef(lla);
