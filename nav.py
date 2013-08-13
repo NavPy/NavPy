@@ -31,42 +31,6 @@ def att2body(eul_radians):
                      [0.0, -sin(phi),  cos(phi)*cos(the)]])
     return R
 
-# Function eul2dcm
-def eul2dcm(eul):
-	"""
-	This function converts Euler Angle into DCM.
-	Input: 
-	  e: Euler Angle in radian, 1x3, in the following order
-	     [Roll Pitch Yaw]
-	Output:
-	  C: Direction Cosine Matrix, 3x3
-	Programmer:    Adhika Lie
-	Created:    	 May 03, 2011
-	Last Modified: May 10, 2011
-	
-	May 10 - Fix bug on each rotation matrix
-	"""
-	phi = eul[0]; the = eul[1]; psi = eul[2];
-	R3 = numpy.zeros((3,3));
-	R2 = numpy.zeros((3,3));
-	R1 = numpy.zeros((3,3));
-	
-	R3[2,2] = 1.0;
-	R3[0,0] = cos(psi); R3[0,1] = sin(psi);
-	R3[1,0] =-sin(psi); R3[1,1] = cos(psi);
-	
-	R2[1,1] = 1.0;
-	R2[0,0] = cos(the); R2[0,2] =-sin(the);
-	R2[2,0] = sin(the); R2[2,2] = cos(the);
-	
-	R1[0,0] = 1.0;
-	R1[1,1] = cos(phi); R1[1,2] = sin(phi);
-	R1[2,1] =-sin(phi); R1[2,2] = cos(phi);
-	
-	C = numpy.dot(R1,numpy.dot(R2,R3));
-	
-	return C;
-
 def angle2dcm(yaw, pitch, roll, input_units='rad', rotation_sequence='321'):
     """
     Returns a transformation matrix (aka direction cosine matrix or DCM) which 
