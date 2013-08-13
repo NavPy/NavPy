@@ -238,6 +238,33 @@ class TestNavClass(unittest.TestCase):
         # conditions.  These tests can be added later to impose desired behavior
         #self.assertAlmostEqual( np.pi, nav.wrap_pi( np.pi))
         #self.assertAlmostEqual(-np.pi, nav.wrap_pi(-np.pi))
+        
+    def test_angle2dcm(self):
+        """
+        Test forming transformation from navigation to body frame based on
+        specified Euler angles.
+        
+        Data Source: Example generated using book GNSS Applications and Methods
+             Chapter 7 library function: eul2Cbn.m (transpose of this used)
+        """
+        
+        # This test actually is for the inverse transformation (Rbody2nav), 
+        # which is simply the transpose of Rnav2body.
+        yaw, pitch, roll = np.deg2rad([-83, 2.3, 13])
+
+        Rnav2body_expected = np.matrix([[ 0.121771, -0.991747, -0.040132],
+                                        [ 0.968207,  0.109785,  0.224770],
+                                        [-0.218509, -0.066226,  0.973585]])
+
+        Rnav2body_computed = nav.angle2dcm(yaw, pitch, roll)
+        
+        np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
+        
+        # Test units feature
+        yaw_deg, pitch_deg, roll_deg = np.rad2deg([yaw, pitch, roll])
+        Rnav2body_computed = nav.angle2dcm(yaw_deg, pitch_deg, roll_deg, input_units='deg')
+        np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
+        
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestNavClass)
     unittest.TextTestRunner(verbosity=2).run(suite)    
