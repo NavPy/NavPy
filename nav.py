@@ -151,25 +151,6 @@ def Rbody2nav_to_angle(R, output_units='rad', rotation_sequence='321'):
         
     return yaw, pitch, roll
     
-
-# Function dcm2eul
-def dcm2eul(C):
-	"""
-	This function converts the DCM to Euler Angle.
-	Input: 
-	  C: Direction Cosine Matrix, 3x3
-	Output:
-	  e: Euler Angle in radian, 1x3, in the following order
-	     [Roll Pitch Yaw]
-	Programmer:    Adhika Lie
-	Created:    	 May 03, 2011
-	Last Modified: May 03, 2011
-	"""
-	e = numpy.zeros((1,3));
-	e[0][2] = atan2(C[0,1],C[0,0]);  #yaw
-	e[0][1] = -asin(C[0,2]);         #pitch
-	e[0][0] = atan2(C[1,2],C[2,2]);  #roll
-	return e;
 	
 #################### EARTH PROPERTY (WGS84) ############################
 # Function earthrad(lat)
