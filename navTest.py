@@ -248,8 +248,7 @@ class TestNavClass(unittest.TestCase):
              Chapter 7 library function: eul2Cbn.m (transpose of this used)
         """
         
-        # This test actually is for the inverse transformation (Rbody2nav), 
-        # which is simply the transpose of Rnav2body.
+        # Define Euler angles
         yaw, pitch, roll = np.deg2rad([-83, 2.3, 13])
 
         Rnav2body_expected = np.matrix([[ 0.121771, -0.991747, -0.040132],
@@ -264,6 +263,28 @@ class TestNavClass(unittest.TestCase):
         yaw_deg, pitch_deg, roll_deg = np.rad2deg([yaw, pitch, roll])
         Rnav2body_computed = nav.angle2dcm(yaw_deg, pitch_deg, roll_deg, input_units='deg')
         np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
+    
+    def test_Rbody2nav_to_angle(self):
+        """
+        Test deriving Euler angles from body -> nav transformation matrix
+        (transpose of DCM).
+        
+        This test simply creates a DCM, transposes it (to get body -> nav) and
+        attempts to recover the original angles.
+        """
+        # Define (expected) Euler angles and associated DCM (Rnav2body)
+        yaw, pitch, roll = [-83, 2.3, 13] # degrees
+
+        Rnav2body = np.matrix([[ 0.121771, -0.991747, -0.040132],
+                               [ 0.968207,  0.109785,  0.224770],
+                               [-0.218509, -0.066226,  0.973585]])
+
+        Rbody2nav = Rnav2body.T
+        
+        yaw_C, pitch_C, roll_C = nav.Rbody2nav_to_angle(Rbody2nav, output_units='deg')
+        
+        # Match won't be perfect because Rnav2body is rounded.
+        np.testing.assert_almost_equal([yaw_C, pitch_C, roll_C], [yaw, pitch, roll], decimal=4)
         
     def test_sk(self):
         """

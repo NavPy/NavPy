@@ -109,6 +109,49 @@ def angle2dcm(yaw, pitch, roll, input_units='rad', rotation_sequence='321'):
     
     return Rnav2body
 
+def Rbody2nav_to_angle(R, output_units='rad', rotation_sequence='321'):
+    """
+    Returns a Euler angles derived from transformation matrix R (body->nav).
+    This transformation matrix is the transpose of the DCM.
+    The rotation sequence specifies the order of rotations which were assumed
+    when forming the DCM (R.T). The default is '321' (i.e Yaw -> Pitch -> Roll).
+
+    Parameters
+    ----------
+    R : 3x3 numpy array or matrix
+        Transformation matrix from body -> nav (transpose of DCM)
+    output_units : {'rad', 'deg'}, optional
+                   Units for output Euler angles.
+    rotationSequence : {'321', others can be implemented in the future}
+                       Assumed rotation sequence for the supplied DCM (R.T).
+
+    Returns
+    -------
+    yaw   : yaw angle, units of output_units.
+    pitch : pitch angle, units of output_units.
+    roll  : roll angle , units of output_units.
+    
+    
+    Reference
+    ---------
+    [1] Equation 2.45-47, Aided Navigation: GPS with High Rate Sensors, Jay A. Farrel 2008
+    [2] Cbn2eul.m function at:
+    http://www.gnssapplications.org/downloads/chapter7/Chapter7_GNSS_INS_Functions.tar.gz        
+    """
+    yaw = np.arctan2(R[1,0], R[0,0])
+    #pitch = -np.arctan(R[2,0] / np.sqrt(1.-R[2,0]**2)) # Farrel eqn 2.45
+    pitch =  -np.arcsin(R[2,0]) #  this is simpler
+    roll  = np.arctan2(R[2,1], R[2,2] )
+    
+    # Apply necessary unit transformations.
+    if output_units == 'rad':
+        pass
+    elif output_units == 'deg':
+        yaw, pitch, roll = np.degrees([yaw, pitch, roll])
+        
+    return yaw, pitch, roll
+    
+
 # Function dcm2eul
 def dcm2eul(C):
 	"""
@@ -479,6 +522,7 @@ def sk(w):
 	
 	May 10 - Fix syntax error
 	"""
+	# TODO: this will not work if w is an matrix!
 	C=numpy.matrix([[0.0, -w[2], w[1]], [w[2], 0.0, -w[0]], [-w[1], w[0], 0.0]]);
 	
 	return C;
