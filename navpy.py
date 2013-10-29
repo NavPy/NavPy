@@ -1,15 +1,15 @@
 import numpy as np
 
-def eul2quat(rotAngle1,rotAngle2,rotAngle3,
+def angle2quat(rotAngle1,rotAngle2,rotAngle3,
                 input_unit='rad',rotation_sequence='ZYX'):
     """
     
     """
     
     # INPUT CHECK
-    rotAngle1,N1 = input_check_1d(rotAngle1)
-    rotAngle2,N2 = input_check_1d(rotAngle2)
-    rotAngle3,N3 = input_check_1d(rotAngle3)
+    rotAngle1,N1 = input_check_Nx1(rotAngle1)
+    rotAngle2,N2 = input_check_Nx1(rotAngle2)
+    rotAngle3,N3 = input_check_Nx1(rotAngle3)
     
     if( (N1!=N2) | (N1!=N3) | (N2!=N3) ):
         raise ValueError('Inputs are not of same dimensions')
@@ -41,8 +41,13 @@ def eul2quat(rotAngle1,rotAngle2,rotAngle3,
 
     return q0, qvec
 
+def quat2angle(q0,qvec,output_unit='rad',rotation_sequence='ZYX'):
+    """
+    
+    """
 
-def input_check_1d(x):
+
+def input_check_Nx1(x):
     x = np.atleast_1d(x)
     theSize = np.shape(x)
 
