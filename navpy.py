@@ -5,23 +5,18 @@ def eul2quat(rotAngle1,rotAngle2,rotAngle3,
     """
     
     """
-    """
+    
     # INPUT CHECK
-    rotAngle1 = np.array(rotAngle1)
-    rotAngle2 = np.array(rotAngle2)
-    rotAngle3 = np.array(rotAngle3)
-    if(len(rotAngle1.shape)==0):
-        rotAngle1.reshape(1,)
-    if(len(rotAngle2.shape)==0):
-        rotAngle2.reshape(1,)
-    if(len(rotAngle3.shape)==0):
-        rotAngle3.reshape(1,)
+    rotAngle1,N1 = input_check_1d(rotAngle1)
+    rotAngle2,N2 = input_check_1d(rotAngle2)
+    rotAngle3,N3 = input_check_1d(rotAngle3)
+    
+    if( (N1!=N2) | (N1!=N3) | (N2!=N3) ):
+        raise ValueError('Inputs are not of same dimensions')
+    
+    q0 = np.zeros(N1)
+    qvec = np.zeros((N1,3))
 
-    if(len(rotAngle1.shape)==2)
-
-    rotAngle1.shape[0]
-    """
-       
     if(input_unit=='deg'):
         rotAngle1 = np.deg2rad(rotAngle1)
         rotAngle2 = np.deg2rad(rotAngle2)
@@ -32,17 +27,30 @@ def eul2quat(rotAngle1,rotAngle2,rotAngle3,
     rotAngle3 /= 2.0
     
     if(rotation_sequence=='ZYX'):
-        q0 = np.cos(rotAngle1)*np.cos(rotAngle2)*np.cos(rotAngle3) + \
+        q0[:] = np.cos(rotAngle1)*np.cos(rotAngle2)*np.cos(rotAngle3) + \
                 np.sin(rotAngle1)*np.sin(rotAngle2)*np.sin(rotAngle3)
 
-        qvec = np.zeros(3)
-        qvec[0] = np.cos(rotAngle1)*np.cos(rotAngle2)*np.sin(rotAngle3) - \
+        qvec[:,0] = np.cos(rotAngle1)*np.cos(rotAngle2)*np.sin(rotAngle3) - \
             np.sin(rotAngle1)*np.sin(rotAngle2)*np.cos(rotAngle3)
 
-        qvec[1] = np.cos(rotAngle1)*np.sin(rotAngle2)*np.cos(rotAngle3) + \
+        qvec[:,1] = np.cos(rotAngle1)*np.sin(rotAngle2)*np.cos(rotAngle3) + \
             np.sin(rotAngle1)*np.cos(rotAngle2)*np.sin(rotAngle3)
 
-        qvec[2] = np.sin(rotAngle1)*np.cos(rotAngle2)*np.cos(rotAngle3) - \
+        qvec[:,2] = np.sin(rotAngle1)*np.cos(rotAngle2)*np.cos(rotAngle3) - \
             np.cos(rotAngle1)*np.sin(rotAngle2)*np.sin(rotAngle3)
 
     return q0, qvec
+
+
+def input_check_1d(x):
+    x = np.atleast_1d(x)
+    theSize = np.shape(x)
+
+    if(len(theSize)>1):
+        #1. Input must be of size N x 1
+        if ((theSize[0]!=1) & (theSize[1]!=1)):
+            raise ValueError('Not an N x 1 array')
+        #2. Make it into a 1-D array
+        x = x.reshape(np.size(x))
+
+    return x,np.size(x)
