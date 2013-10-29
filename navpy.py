@@ -3,7 +3,38 @@ import numpy as np
 def angle2quat(rotAngle1,rotAngle2,rotAngle3,
                 input_unit='rad',rotation_sequence='ZYX'):
     """
+    Convert a sequence of rotation angles to an equivalent unit quaternion
     
+    This function can take inputs in either degree or radians, and can also 
+    batch process a series of rotations (e.g., time series of Euler angles).
+    By default this function assumes aerospace rotation sequence but can be 
+    changed using the ``rotation_sequence`` keyword argument.
+    
+    Parameters
+    ----------
+    rotAngle1, rotAngle2, rotAngle3: {(N,), (N,1), or (1,N)} angles
+            They are a sequence of angles about successive axes described by 
+            rotation_sequence.
+    input_unit: {'rad', 'deg'}, optional. Rotation angles. Default is 'rad'.
+    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
+    
+    Returns
+    -------
+    q0: {(N,)} array like scalar componenet of the quaternion
+    qvec:{(N,3)} array like vector component of the quaternion
+    
+    Notes
+    -----
+    Convert rotation angles to unit quaternion that transfroms a vector in F1 to
+    F2 according to
+    
+    :math: `v_q^{F2} = q^{-1} \otimes v_q^{F1} \otimes q`
+    
+    :math:`\otimes` indicates the quaternion multiplcation and :math:`\v_q^F`
+    is a pure quaternion representation of the vector :math:`\v_q^F`. The scalar
+    componenet of :math:`v_q^F` is zero.
+    For aerospace sequence ('ZYX'): rotAngle1 = psi, rotAngle2 = the,
+    and rotAngle3 = phi
     """
     
     # INPUT CHECK
@@ -45,7 +76,39 @@ def angle2quat(rotAngle1,rotAngle2,rotAngle3,
 
 def quat2angle(q0,qvec,output_unit='rad',rotation_sequence='ZYX'):
     """
+        Convert a unit quaternion to the equivalent sequence of angles of rotation
+        about the rotation_sequence axes.
+        
+        This function can take inputs in either degree or radians, and can also
+        batch process a series of rotations (e.g., time series of quaternions).
+        By default this function assumes aerospace rotation sequence but can be
+        changed using the ``rotation_sequence`` keyword argument.
+        
+        Parameters
+        ----------
+        q0: {(N,), (N,1), or (1,N)} array like scalar componenet of the quaternion
+        qvec:{(N,3),(3,N)} array like vector component of the quaternion
+        rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
     
+        Returns
+        -------
+        rotAngle1, rotAngle2, rotAngle3: {(N,), (N,1), or (1,N)} angles
+        They are a sequence of angles about successive axes described by
+        rotation_sequence.
+        output_unit: {'rad', 'deg'}, optional. Rotation angles. Default is 'rad'.
+        
+        Notes
+        -----
+        Convert rotation angles to unit quaternion that transfroms a vector in F1 to
+        F2 according to
+        
+        :math: `v_q^{F2} = q^{-1} \otimes v_q^{F1} \otimes q`
+        
+        :math:`\otimes` indicates the quaternion multiplcation and :math:`\v_q^F`
+        is a pure quaternion representation of the vector :math:`\v_q^F`. The scalar
+        componenet of :math:`v_q^F` is zero.
+        For aerospace sequence ('ZYX'): rotAngle1 = psi, rotAngle2 = the, 
+        and rotAngle3 = phi
     """
     q0, N0 = input_check_Nx1(q0)
     qvec, Nvec = input_check_Nx3(qvec)
