@@ -35,6 +35,30 @@ def angle2quat(rotAngle1,rotAngle2,rotAngle3,
     componenet of :math:`v_q^F` is zero.
     For aerospace sequence ('ZYX'): rotAngle1 = psi, rotAngle2 = the,
     and rotAngle3 = phi
+    
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from navpy import angle2quat
+    >>> psi = 0
+    >>> theta = np.pi/4.0
+    >>> phi = np.pi/3.0
+    >>> q0, qvec = angle2quat(psi,theta,phi)
+    >>> q0
+    0.80010314519126557
+    >>> qvec
+    array([ 0.46193977,  0.33141357, -0.19134172])
+    
+    >>> psi = [10, 20, 30]
+    >>> theta = [30, 40, 50]
+    >>> phi = [0, 5, 10]
+    >>> q0, qvec = angle2quat(psi,theta,phi,input_unit = 'deg')
+    >>> q0
+    array([ 0.96225019,  0.92712639,  0.88162808])
+    >>> qvec
+    array([[-0.02255757,  0.25783416,  0.08418598],
+           [-0.01896854,  0.34362114,  0.14832854],
+           [-0.03266701,  0.4271086 ,  0.19809857]])
     """
     
     # INPUT CHECK
@@ -72,6 +96,9 @@ def angle2quat(rotAngle1,rotAngle2,rotAngle3,
     else:
         raise ValueError('rotation_sequence unknown')
 
+    if(N1 == 1):
+        q0 = q0[0]
+        qvec = qvec.reshape(3,)
     return q0, qvec
 
 def quat2angle(q0,qvec,output_unit='rad',rotation_sequence='ZYX'):
@@ -109,6 +136,40 @@ def quat2angle(q0,qvec,output_unit='rad',rotation_sequence='ZYX'):
         componenet of :math:`v_q^F` is zero.
         For aerospace sequence ('ZYX'): rotAngle1 = psi, rotAngle2 = the, 
         and rotAngle3 = phi
+        
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from navpy import quat2angle
+        >>> q0 = 0.800103145191266
+        >>> qvec = np.array([0.4619398,0.3314136,-0.1913417])
+        >>> psi, theta, phi = quat2angle(q0,qvec)
+        >>> psi
+        1.0217702360987295e-07
+        >>> theta
+        0.7853982192745731
+        >>> phi
+        1.0471976051067484
+        
+        >>> psi, theta, phi = quat2angle(q0,qvec,output_unit='deg')
+        >>> psi
+        0.0
+        >>> theta
+        45.000000000000007
+        >>> phi
+        60.000000000000007
+        
+        >>> q0 = [ 0.96225019,  0.92712639,  0.88162808]
+        >>> qvec = np.array([[-0.02255757,  0.25783416,  0.08418598],
+                             [-0.01896854,  0.34362114,  0.14832854],
+                             [-0.03266701,  0.4271086 ,  0.19809857]])
+        >>> psi, theta, phi = quat2angle(q0,qvec,output_unit='deg')
+        >>> psi
+        array([  9.99999941,  19.99999997,  29.9999993 ])
+        >>> theta
+        array([ 30.00000008,  39.99999971,  50.00000025])
+        >>> phi
+        array([ -6.06200867e-07,   5.00000036e+00,   1.00000001e+01])
     """
     q0, N0 = input_check_Nx1(q0)
     qvec, Nvec = input_check_Nx3(qvec)
