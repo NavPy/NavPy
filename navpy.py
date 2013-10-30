@@ -279,6 +279,48 @@ def quat2dcm(q0,qvec,rotation_sequence='ZYX',output_type='ndarray'):
 
     return C_N2B
 
+def dcm2quat(C,rotation_sequence='ZYX'):
+    """
+    Convert a DCM to a unit quaternion
+    
+    Parameters
+    ----------
+    C: direction consine matrix that rotates the vector from the first frame
+    to the second frame according to the specified rotation_sequence.
+    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
+    
+    Return
+    ------
+    q0: {(N,)} array like scalar componenet of the quaternion
+    qvec:{(N,3)} array like vector component of the quaternion
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from navpy import dcm2quat
+    >>> C = np.array([[  9.25570440e-01,   3.36869440e-01,  -1.73581360e-01],
+                      [ -3.42051760e-01,   9.39837700e-01,   5.75800000e-05],
+                      [  1.63132160e-01,   5.93160200e-02,   9.84972420e-01]])
+    >>> q0,qvec = dcm2quat(C)
+    >>> q0
+    0.98111933015306552
+    >>> qvec
+    array([-0.0150997 ,  0.08579831,  0.17299659])
+    """
+    
+    if(C.shape[0]!=C.shape[1]):
+        raise ValueError('Input is not a square matrix')
+    if(C.shape[0]!=3):
+        raise ValueError('Input needs to be a 3x3 array or matrix')
+
+    qvec = np.zeros(3)
+    q0 = 0.5*np.sqrt(C[0,0]+C[1,1]+C[2,2]+1)
+    qvec[0] = (C[1,2]-C[2,1])/(4*q0)
+    qvec[1] = (C[2,0]-C[0,2])/(4*q0)
+    qvec[2] = (C[0,1]-C[1,0])/(4*q0)
+
+    return q0,qvec
+
 def input_check_Nx1(x):
     x = np.atleast_1d(x)
     theSize = np.shape(x)
