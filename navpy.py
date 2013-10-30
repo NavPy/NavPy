@@ -103,73 +103,73 @@ def angle2quat(rotAngle1,rotAngle2,rotAngle3,
 
 def quat2angle(q0,qvec,output_unit='rad',rotation_sequence='ZYX'):
     """
-        Convert a unit quaternion to the equivalent sequence of angles of rotation
-        about the rotation_sequence axes.
-        
-        This function can take inputs in either degree or radians, and can also
-        batch process a series of rotations (e.g., time series of quaternions).
-        By default this function assumes aerospace rotation sequence but can be
-        changed using the ``rotation_sequence`` keyword argument.
-        
-        Parameters
-        ----------
-        q0: {(N,), (N,1), or (1,N)} array like scalar componenet of the quaternion
-        qvec:{(N,3),(3,N)} array like vector component of the quaternion
-        rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
+    Convert a unit quaternion to the equivalent sequence of angles of rotation
+    about the rotation_sequence axes.
     
-        Returns
-        -------
-        rotAngle1, rotAngle2, rotAngle3: {(N,), (N,1), or (1,N)} angles
-        They are a sequence of angles about successive axes described by
-        rotation_sequence.
-        output_unit: {'rad', 'deg'}, optional. Rotation angles. Default is 'rad'.
-        
-        Notes
-        -----
-        Convert rotation angles to unit quaternion that transfroms a vector in F1 to
-        F2 according to
-        
-        :math: `v_q^{F2} = q^{-1} \otimes v_q^{F1} \otimes q`
-        
-        :math:`\otimes` indicates the quaternion multiplcation and :math:`\v_q^F`
-        is a pure quaternion representation of the vector :math:`\v_q^F`. The scalar
-        componenet of :math:`v_q^F` is zero.
-        For aerospace sequence ('ZYX'): rotAngle1 = psi, rotAngle2 = the, 
-        and rotAngle3 = phi
-        
-        Examples
-        --------
-        >>> import numpy as np
-        >>> from navpy import quat2angle
-        >>> q0 = 0.800103145191266
-        >>> qvec = np.array([0.4619398,0.3314136,-0.1913417])
-        >>> psi, theta, phi = quat2angle(q0,qvec)
-        >>> psi
-        1.0217702360987295e-07
-        >>> theta
-        0.7853982192745731
-        >>> phi
-        1.0471976051067484
-        
-        >>> psi, theta, phi = quat2angle(q0,qvec,output_unit='deg')
-        >>> psi
-        5.8543122160542875e-06
-        >>> theta
-        45.00000320152342
-        >>> phi
-        60.000003088824108
-        
-        >>> q0 = [ 0.96225019,  0.92712639,  0.88162808]
-        >>> qvec = np.array([[-0.02255757,  0.25783416,  0.08418598],\
-                             [-0.01896854,  0.34362114,  0.14832854],\
-                             [-0.03266701,  0.4271086 ,  0.19809857]])
-        >>> psi, theta, phi = quat2angle(q0,qvec,output_unit='deg')
-        >>> psi
-        array([  9.99999941,  19.99999997,  29.9999993 ])
-        >>> theta
-        array([ 30.00000008,  39.99999971,  50.00000025])
-        >>> phi
-        array([ -6.06200867e-07,   5.00000036e+00,   1.00000001e+01])
+    This function can take inputs in either degree or radians, and can also
+    batch process a series of rotations (e.g., time series of quaternions).
+    By default this function assumes aerospace rotation sequence but can be
+    changed using the ``rotation_sequence`` keyword argument.
+    
+    Parameters
+    ----------
+    q0: {(N,), (N,1), or (1,N)} array like scalar componenet of the quaternion
+    qvec:{(N,3),(3,N)} array like vector component of the quaternion
+    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
+
+    Returns
+    -------
+    rotAngle1, rotAngle2, rotAngle3: {(N,), (N,1), or (1,N)} angles
+    They are a sequence of angles about successive axes described by
+    rotation_sequence.
+    output_unit: {'rad', 'deg'}, optional. Rotation angles. Default is 'rad'.
+    
+    Notes
+    -----
+    Convert rotation angles to unit quaternion that transfroms a vector in F1 to
+    F2 according to
+    
+    :math: `v_q^{F2} = q^{-1} \otimes v_q^{F1} \otimes q`
+    
+    :math:`\otimes` indicates the quaternion multiplcation and :math:`\v_q^F`
+    is a pure quaternion representation of the vector :math:`\v_q^F`. The scalar
+    componenet of :math:`v_q^F` is zero.
+    For aerospace sequence ('ZYX'): rotAngle1 = psi, rotAngle2 = the, 
+    and rotAngle3 = phi
+    
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from navpy import quat2angle
+    >>> q0 = 0.800103145191266
+    >>> qvec = np.array([0.4619398,0.3314136,-0.1913417])
+    >>> psi, theta, phi = quat2angle(q0,qvec)
+    >>> psi
+    1.0217702360987295e-07
+    >>> theta
+    0.7853982192745731
+    >>> phi
+    1.0471976051067484
+    
+    >>> psi, theta, phi = quat2angle(q0,qvec,output_unit='deg')
+    >>> psi
+    5.8543122160542875e-06
+    >>> theta
+    45.00000320152342
+    >>> phi
+    60.000003088824108
+    
+    >>> q0 = [ 0.96225019,  0.92712639,  0.88162808]
+    >>> qvec = np.array([[-0.02255757,  0.25783416,  0.08418598],\
+                         [-0.01896854,  0.34362114,  0.14832854],\
+                         [-0.03266701,  0.4271086 ,  0.19809857]])
+    >>> psi, theta, phi = quat2angle(q0,qvec,output_unit='deg')
+    >>> psi
+    array([  9.99999941,  19.99999997,  29.9999993 ])
+    >>> theta
+    array([ 30.00000008,  39.99999971,  50.00000025])
+    >>> phi
+    array([ -6.06200867e-07,   5.00000036e+00,   1.00000001e+01])
     """
     q0, N0 = input_check_Nx1(q0)
     qvec, Nvec = input_check_Nx3(qvec)
@@ -209,6 +209,75 @@ def quat2angle(q0,qvec,output_unit='rad',rotation_sequence='ZYX'):
 
     return rotAngle1, rotAngle2, rotAngle3
 
+def quat2dcm(q0,qvec,rotation_sequence='ZYX',output_type='ndarray'):
+    """
+    Convert a single unit quaternion to one DCM
+    
+    Parameters
+    ----------
+    q0: {(N,), (N,1), or (1,N)} array like scalar componenet of the quaternion
+    qvec:{(N,3),(3,N)} array like vector component of the quaternion
+    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
+    output_type: {'ndarray','matrix'}, optional. Output is either numpy array
+            (default) or numpy matrix.
+            
+    Returns
+    -------
+    C_N2B: direction consine matrix that rotates the vector from the first frame
+        to the second frame according to the specified rotation_sequence.
+        
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from navpy import quat2dcm
+    >>> q0 = 1
+    >>> qvec = [0, 0, 0]
+    >>> C = quat2dcm(q0,qvec)
+    >>> C
+    array([[ 1.,  0.,  0.],
+           [ 0.,  1.,  0.],
+           [ 0.,  0.,  1.]])
+    
+    >>> q0 = 0.9811
+    >>> qvec = np.array([-0.0151, 0.0858, 0.1730])
+    >>> C = quat2dcm(q0,qvec,output_type='matrix')
+    >>> C
+    matrix([[  9.25570440e-01,   3.36869440e-01,  -1.73581360e-01],
+            [ -3.42051760e-01,   9.39837700e-01,   5.75800000e-05],
+            [  1.63132160e-01,   5.93160200e-02,   9.84972420e-01]])
+    """
+    # Input check
+    q0,N0 = input_check_Nx1(q0)
+    qvec,Nvec = input_check_Nx3(qvec)
+
+    if((N0!=1) | (Nvec!=1)):
+        raise ValueError('Can only process 1 quaternion')
+
+    q1 = qvec[:,0]
+    q2 = qvec[:,1]
+    q3 = qvec[:,2]
+    if(rotation_sequence=='ZYX'):
+        C_N2B = np.zeros((3,3))
+
+        C_N2B[0,0] =  2*q0**2 - 1 + 2*q1**2
+        C_N2B[1,1] =  2*q0**2 - 1 + 2*q2**2
+        C_N2B[2,2] =  2*q0**2 - 1 + 2*q3**2
+
+        C_N2B[0,1] = 2*q1*q2 + 2*q0*q3
+        C_N2B[0,2] = 2*q1*q3 - 2*q0*q2
+
+        C_N2B[1,0] = 2*q1*q2 - 2*q0*q3
+        C_N2B[1,2] = 2*q2*q3 + 2*q0*q1
+
+        C_N2B[2,0] = 2*q1*q3 + 2*q0*q2
+        C_N2B[2,1] = 2*q2*q3 - 2*q0*q1
+    else:
+        raise ValueError('rotation_sequence unknown')
+
+    if(output_type=='matrix'):
+        C_N2B = np.asmatrix(C_N2B)
+
+    return C_N2B
 
 def input_check_Nx1(x):
     x = np.atleast_1d(x)
@@ -220,7 +289,8 @@ def input_check_Nx1(x):
             raise ValueError('Not an N x 1 array')
         #2. Make it into a 1-D array
         x = x.reshape(np.size(x))
-
+    else:
+        x = x[0]
     return x,np.size(x)
 
 def input_check_Nx3(x):
