@@ -334,7 +334,23 @@ def qmult(p0,pvec,q0,qvec):
     ------
     r0: {(N,)} array like scalar componenet of the quaternion
     rvec:{(N,3)} array like vector component of the quaternion
+    
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from navpy import qmult
+    >>> p0, pvec = 0.701057, np.array([-0.69034553,  0.15304592,  0.09229596])
+    >>> q0, qvec = 0.987228, np.array([ 0.12613659,  0.09199968,  0.03171637])
+    >>> qmult(q0,qvec,p0,pvec)
+    (0.76217346258977192, array([-0.58946236,  0.18205109,  0.1961684 ]))
+    >>> s0, svec = 0.99879, np.array([ 0.02270747,  0.03430854, -0.02691584])
+    >>> t0, tvec = 0.84285, np.array([ 0.19424161, -0.18023625, -0.46837843])
+    >>> qmult(s0,svec,t0,tvec)
+    (0.83099625967941704, array([ 0.19222498, -0.1456937 , -0.50125456]))
+    >>> qmult([p0, s0],[pvec, svec],[q0, t0], [qvec, tvec])
+    (array([ 0.76217346,  0.83099626]), array([[-0.59673664,  0.24912539,  0.03053588], [ 0.19222498, -0.1456937 , -0.50125456]]))
     """
+    
     p0,Np = input_check_Nx1(p0)
     q0,Nq = input_check_Nx1(q0)
     if(Np!=Nq):
@@ -347,9 +363,17 @@ def qmult(p0,pvec,q0,qvec):
     qvec,Nq = input_check_Nx3(qvec)
     if(Np!=Nq):
         raise ValueError('Inputs are not of the same dimension')
+    
+    if(Np > 1):
+        r0 = p0*q0 - np.sum(pvec*qvec,axis=1)
+    else:
+        r0 = p0*q0 - np.dot(pvec,qvec)
 
-    r0 = p0*q0 - np.dot(pvec,qvec.T)
     rvec = p0.reshape(Np,1)*qvec + q0.reshape(Np,1)*pvec + np.cross(pvec,qvec)
+
+    # For only 1-D input, make it into a flat 1-D array
+    if(Np == 1):
+        rvec = rvec.reshape(3)
 
     return r0,rvec
 
@@ -379,5 +403,9 @@ def input_check_Nx3(x):
         #2. Make it into a Nx3 array
         if (theSize[1]!=3):
             x = x.T
-    
-    return x,x.shape[0]
+        N = x.shape[0]
+        #3. If N == 1, make it into a 1-D array
+        if (x.shape[0]==1):
+            x = x.reshape(x.shape[1])
+
+    return x,N
