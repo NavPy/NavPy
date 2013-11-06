@@ -1,4 +1,5 @@
 import numpy as np
+import wgs84
 
 def angle2quat(rotAngle1,rotAngle2,rotAngle3,
                 input_unit='rad',rotation_sequence='ZYX'):
@@ -376,6 +377,91 @@ def qmult(p0,pvec,q0,qvec):
         rvec = rvec.reshape(3)
 
     return r0,rvec
+
+def llarate(VN,VE,VD,lat,alt,lat_unit='deg',alt_unit='m'):
+    """
+    Calculate Latitude, Longitude, Altitude Rate given locally tangent velocity
+    Parameters
+    ----------
+    VN: {(N,)} array like earth relative velocity in the North direction, m/s
+    VE: {(N,)} array like earth relative velocity in the East direction, m/s
+    VD: {(N,)} array like earth relative velocity in the Down direction, m/s
+    lat: {(N,)} array like latitudes, unit specified in lat_unit, default deg
+    alt: {(N,)} array like altitudes, unit specified in alt_unit, default m
+    
+    Return
+    ------
+    lla_dot: {(N,3)} np.array of latitude rate, longitude rate, altitude rate.
+             The unit of latitude and longitude rate will be the same as the 
+             unit specified by lat_unit and the unit of altitude rate will be 
+             the same as alt_unit
+    Calls
+    -----
+    earthrad
+    """
+    dim_check = 1
+    VN, N1 = input_check_Nx1(VN)
+    VE, N2 = input_check_Nx1(VE)
+    if(N2!=N1):
+        dim_check *= 0
+    VD, N2 = input_check_Nx1(VD)
+    if(N2!=N1):
+        dim_check *= 0
+    lat,N2 = input_check_Nx1(lat)
+    if(N2!=N1):
+        dim_check *= 0
+    alt,N2 = input_check_Nx1(alt)
+    if(N2!=N1):
+        dim_check *= 0
+    if(dim_check==0):
+        raise ValueError('Inputs are not of the same dimension')
+
+    Rew, Rns = earthrad(lat,lat_unit=lat_unit)
+
+    lla_dot = np.zeros((N1,3))
+    if(lat_unit=='deg'):
+        lla_dot[:,0] = np.rad2deg(VN/(Rns + alt))
+        lla_dot[:,1] = np.rad2deg(VE/(Rew + alt)/np.cos(np.deg2rad(lat)))
+        lla_dot[:,2] = -VD
+    elif(lat_unit=='rad'):
+        lla_dot[:,0] = VN/(Rns + alt)
+        lla_dot[:,1] = VE/(Rew + alt)/np.cos(lat)
+        lla_dot[:,2] = -VD
+
+    if(N1==1):
+        lla_dot = lla_dot.reshape(3)
+
+    return lla_dot
+
+def earthrad(lat, lat_unit='deg', model='wgs84'):
+    """
+    Calculate the meridian (North-South) and transverse (East-West) radii of the
+    earth given an array of latitude
+
+    Parameters
+    ----------
+    lat: {(N,)} array like latitude, unit specified by lat_unit, default in deg
+    
+    Returns
+    -------
+    Rew: {(N,)} array like transverse radii
+    Rns: {(N,)} array like meridian radii
+    """
+    if(lat_unit=='deg'):
+        lat = np.deg2rad(lat)
+    elif(lat_unit=='rad'):
+        pass
+    else:
+        raise ValueError('Input unit unknown')
+
+    if(model=='wgs84'):
+        Rew = wgs84.R0/(1-(wgs84.ecc*np.sin(lat))**2)**0.5
+        Rns = wgs84.R0*(1-wgs84.ecc**2)/(1-(wgs84.ecc*np.sin(lat))**2)**1.5
+    else:
+        raise ValueError('Model unknown')
+    
+    return Rew, Rns
+
 
 def input_check_Nx1(x):
     x = np.atleast_1d(x)
