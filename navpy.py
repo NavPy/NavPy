@@ -321,6 +321,38 @@ def dcm2quat(C,rotation_sequence='ZYX'):
 
     return q0,qvec
 
+def qmult(p0,pvec,q0,qvec):
+    """
+    Quaternion Multiplications r = p x q
+    
+    Parameters
+    ----------
+    p0, q0: {(N,)} array like scalar componenet of the quaternion
+    pvec, qvec:{(N,3)} array like vector component of the quaternion
+    
+    Return
+    ------
+    r0: {(N,)} array like scalar componenet of the quaternion
+    rvec:{(N,3)} array like vector component of the quaternion
+    """
+    p0,Np = input_check_Nx1(p0)
+    q0,Nq = input_check_Nx1(q0)
+    if(Np!=Nq):
+        raise ValueError('Inputs are not of the same dimension')
+    
+    pvec,Np = input_check_Nx3(pvec)
+    if(Np!=Nq):
+        raise ValueError('Inputs are not of the same dimension')
+
+    qvec,Nq = input_check_Nx3(qvec)
+    if(Np!=Nq):
+        raise ValueError('Inputs are not of the same dimension')
+
+    r0 = p0*q0 - np.dot(pvec,qvec.T)
+    rvec = p0.reshape(Np,1)*qvec + q0.reshape(Np,1)*pvec + np.cross(pvec,qvec)
+
+    return r0,rvec
+
 def input_check_Nx1(x):
     x = np.atleast_1d(x)
     theSize = np.shape(x)
@@ -331,8 +363,9 @@ def input_check_Nx1(x):
             raise ValueError('Not an N x 1 array')
         #2. Make it into a 1-D array
         x = x.reshape(np.size(x))
-    else:
+    elif (theSize[0]==1):
         x = x[0]
+    
     return x,np.size(x)
 
 def input_check_Nx3(x):
