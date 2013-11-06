@@ -253,10 +253,10 @@ def quat2dcm(q0,qvec,rotation_sequence='ZYX',output_type='ndarray'):
 
     if((N0!=1) | (Nvec!=1)):
         raise ValueError('Can only process 1 quaternion')
-
-    q1 = qvec[:,0]
-    q2 = qvec[:,1]
-    q3 = qvec[:,2]
+    
+    q1 = qvec[0]
+    q2 = qvec[1]
+    q3 = qvec[2]
     if(rotation_sequence=='ZYX'):
         C_N2B = np.zeros((3,3))
 
