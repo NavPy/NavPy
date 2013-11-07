@@ -462,6 +462,124 @@ def earthrad(lat, lat_unit='deg', model='wgs84'):
     
     return Rew, Rns
 
+def lla2ecef(lat,lon,alt,latlon_unit='deg',alt_unit='m',model='wgs84'):
+    """
+    Convert Latitude, Longitude, Altitude, to ECEF position
+    
+    Parameters
+    ----------
+    lat: {(N,)} array like latitude, unit specified by latlon_unit, default in deg
+    lon: {(N,)} array like longitude, unit specified by latlon_unit, default in deg
+    alt: {(N,)} array like altitude, unit specified by alt_unit, default in m
+    
+    Returns
+    -------
+    ecef: {(N,3)} array like ecef position, unit is the same as alt_unit
+    """
+    lat,N1 = input_check_Nx1(lat)
+    lon,N2 = input_check_Nx1(lon)
+    alt,N3 = input_check_Nx1(alt)
+    
+    if( (N1!=N2) or (N2!=N3) or (N1!=N3) ):
+        raise ValueError('Inputs are not of the same dimension')
+    
+    if(model=='wgs84'):
+        Rew,Rns = earthrad(lat,lat_unit=latlon_unit)
+    else:
+        Rew = wgs84.R0
+    
+    if(latlon_unit=='deg'):
+        lat = np.deg2rad(lat)
+        lon = np.deg2rad(lon)
+    
+    x = (Rew + alt)*np.cos(lat)*np.cos(lon)
+    y = (Rew + alt)*np.cos(lat)*np.sin(lon)
+    z = ( (1-wgs84.ecc**2)*Rew + alt )*np.sin(lat)
+
+    ecef = np.vstack((x,y,z)).T
+
+    return ecef
+
+def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='wgs84'):
+    """
+    Transform a vector resolved in ECEF coordinate to its resolution in the NED
+    coordinate. The center of the NED coordiante is given by lat_ref, lon_ref,
+    and alt_ref.
+    
+    Parameters
+    ----------
+    ecef: {(N,3)} input vector expressed in the ECEF frame
+    lat_ref: Reference latitude, unit specified by latlon_unit, default in deg
+    lon_ref: Reference longitude, unit specified by latlon_unit, default in deg
+    alt: Reference altitude, unit specified by alt_unit, default in m
+    
+    Returns
+    -------
+    ned: {(N,3)} array like ecef position, unit is the same as alt_unit
+    """
+    lat_ref,N1 = input_check_Nx1(lat_ref)
+    lon_ref,N2 = input_check_Nx1(lon_ref)
+    alt_ref,N3 = input_check_Nx1(alt_ref)
+    
+    if( (N1!=1) or (N2!=1) or (N3!=1) ):
+        raise ValueError('Reference Location can only be 1')
+    
+    ecef,N = input_check_Nx3(ecef)
+
+    ecef = ecef.T
+    
+    C = np.zeros((3,3))
+
+    if(latlon_unit=='deg'):
+        lat_ref = np.deg2rad(lat_ref)
+        lon_ref = np.deg2rad(lon_ref)
+    elif(latlon_unit=='rad'):
+        pass
+    else:
+        raise ValueError('Input unit unknown')
+
+    C[0,0]=-np.sin(lat_ref)*np.cos(lon_ref)
+    C[0,1]=-np.sin(lat_ref)*np.sin(lon_ref)
+    C[0,2]= np.cos(lat_ref)
+	
+    C[1,0]=-np.sin(lon_ref)
+    C[1,1]= np.cos(lon_ref)
+    C[1,2]= 0
+
+    C[2,0]=-np.cos(lat_ref)*np.cos(lon_ref)
+    C[2,1]=-np.cos(lat_ref)*np.sin(lon_ref)
+    C[2,2]=-np.sin(lat_ref)
+
+    ned = np.dot(C,ecef)
+    ned = ned.T
+
+    if(N == 1):
+        ned = ned.reshape(3)
+
+    return ned
+
+def skew(w,output_type='ndarray'):
+    """
+    Make a skew symmetric 2-D array
+    Parameters
+    ----------
+    w: {(3,)} array like vector
+    
+    Returns
+    -------
+    C: {(3,3)} skew symmetric representation of w
+    """
+    w,N = input_check_Nx1(w)
+    if(N!=3):
+        raise ValueError('Input dimension is not 3')
+    
+    C = np.array([[0.0, -w[2], w[1]],
+                  [w[2], 0.0, -w[0]],
+                  [-w[1], w[0], 0.0]])
+    if(output_type!='ndarray'):
+        C = np.matrix(C)
+
+    return C
 
 def input_check_Nx1(x):
     x = np.atleast_1d(x)
