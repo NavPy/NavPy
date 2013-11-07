@@ -398,6 +398,23 @@ def llarate(VN,VE,VD,lat,alt,lat_unit='deg',alt_unit='m'):
     Calls
     -----
     earthrad
+    
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from navpy import llarate
+    >>> llarate(100,0,0,45.0,0) # Moving North at 100 m/s, location is at N45.0
+    array([ 0.00089983,  0.        ,  0.        ])
+    >>> # That output was in deg/sec
+    >>> lat = [np.pi/4, -np.pi/6]
+    >>> alt = [100.0, 50]
+    >>> VN = [100, 0]
+    >>> VE = [0, 100]
+    >>> VD = [0, -5]
+    >>> llarate(VN,VE,VD,lat,alt,lat_unit='rad')
+    array([[  1.57047955e-05,   0.00000000e+00,   0.00000000e+00],\
+           [  0.00000000e+00,   1.80887436e-05,   5.00000000e+00]])
+    >>> # That output was in rad/sec
     """
     dim_check = 1
     VN, N1 = input_check_Nx1(VN)
@@ -446,6 +463,23 @@ def earthrad(lat, lat_unit='deg', model='wgs84'):
     -------
     Rew: {(N,)} array like transverse radii
     Rns: {(N,)} array like meridian radii
+    
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from navpy import earthrad
+    >>> lat = 0
+    >>> Rtransverse, Rmeridian = earthrad(lat)
+    >>> Rtransverse
+    6378137.0
+    >>> Rmeridian
+    6335439.3272929471
+    >>> lat = [0, np.pi/2]
+    >>> Rtransverse, Rmeridian = earthrad(lat,lat_unit='rad')
+    >>> Rtransverse
+    array([ 6378137.        ,  6399593.62575843])
+    >>> Rmeridian
+    array([ 6335439.32729295,  6399593.62575843])
     """
     if(lat_unit=='deg'):
         lat = np.deg2rad(lat)
@@ -516,6 +550,12 @@ def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='
     Returns
     -------
     ned: {(N,3)} array like ecef position, unit is the same as alt_unit
+    
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from navpy import ecef2ned
+    >>> lat 
     """
     lat_ref,N1 = input_check_Nx1(lat_ref)
     lon_ref,N2 = input_check_Nx1(lon_ref)
@@ -568,6 +608,16 @@ def skew(w,output_type='ndarray'):
     Returns
     -------
     C: {(3,3)} skew symmetric representation of w
+    
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from navpy import skew
+    >>> w = [1, 2, 3]
+    >>> skew(w)
+    array([[ 0., -3.,  2.],\
+           [ 3.,  0., -1.],\
+           [-2.,  1.,  0.]])
     """
     w,N = input_check_Nx1(w)
     if(N!=3):
