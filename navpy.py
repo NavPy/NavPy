@@ -534,6 +534,52 @@ def lla2ecef(lat,lon,alt,latlon_unit='deg',alt_unit='m',model='wgs84'):
 
     return ecef
 
+def ecef2lla(ecef,latlon_unit='deg'):
+    """
+    Convert ECEF to Lat, Lon, Alt
+    Reference: Jekeli, C.,"Inertial Navigation Systems With Geodetic
+    Applications", Walter de Gruyter, New York, 2001, pp. 24
+    
+    Parameters
+    ----------
+    ecef = {(N,3)} array like input of ECEF coordinate in X, Y, and Z column, unit is meters
+    latlon_unit = {('deg','rad')} specifies the output latitude and longitude unit
+    
+    Returns
+    -------
+    lat = {(N,)} array like latitude in unit specified by latlon_unit
+    lon = {(N,)} array like longitude in unit specified by latlon_unit
+    alt = {(N,)} array like altitude in meters
+    """
+    ecef,N = input_check_Nx3(ecef)
+    if(N>1):
+        x = ecef[:,0]; y = ecef[:,1]; z = ecef[:,2]
+    else:
+        x = ecef[0]; y = ecef[1]; z = ecef[2]
+
+    lon = np.arctan2(y,x)
+
+    # Iteration to get Latitude and Altitude
+    p = np.sqrt(x**2 + y**2)
+    lat = np.arctan2(z,p*(1-wgs84.ecc**2))
+
+    err = np.ones(N)
+
+    while(np.max(np.abs(err))>1e-14):
+        Rew,Rns = earthrad(lat,lat_unit='rad')
+        h = p/np.cos(lat) - Rew
+        
+        err = np.arctan2(z*(1+wgs84.ecc**2*Rew*np.sin(lat)/z),p) - lat
+        
+        lat = lat + err
+    
+    if(latlon_unit=='deg'):
+        lat = np.rad2deg(lat)
+        lon = np.rad2deg(lon)
+
+    return lat, lon, h
+
+
 def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='wgs84'):
     """
     Transform a vector resolved in ECEF coordinate to its resolution in the NED
