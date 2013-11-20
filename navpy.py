@@ -452,8 +452,8 @@ def llarate(VN,VE,VD,lat,alt,lat_unit='deg',alt_unit='m'):
 
 def earthrad(lat, lat_unit='deg', model='wgs84'):
     """
-    Calculate the meridian (North-South) and transverse (East-West) radii of the
-    earth given an array of latitude
+    Calculate radius of curvature in the prime vertical (East-West) and 
+    meridian (North-South) at a given latitude.
 
     Parameters
     ----------
@@ -461,8 +461,8 @@ def earthrad(lat, lat_unit='deg', model='wgs84'):
     
     Returns
     -------
-    Rew: {(N,)} array like transverse radii
-    Rns: {(N,)} array like meridian radii
+    R_N: {(N,)} array like, radius of curvature in the prime vertical (East-West)
+    R_M: {(N,)} array like, radius of curvature in the meridian (North-South)
     
     Examples
     --------
@@ -473,13 +473,13 @@ def earthrad(lat, lat_unit='deg', model='wgs84'):
     >>> Rtransverse
     6378137.0
     >>> Rmeridian
-    6335439.3272929471
+    6335439.3272928288
     >>> lat = [0, np.pi/2]
     >>> Rtransverse, Rmeridian = earthrad(lat,lat_unit='rad')
     >>> Rtransverse
-    array([ 6378137.        ,  6399593.62575843])
+    array([ 6378137.        ,  6399593.62575849])
     >>> Rmeridian
-    array([ 6335439.32729295,  6399593.62575843])
+    array([ 6335439.32729283,  6399593.62575849])
     """
     if(lat_unit=='deg'):
         lat = np.deg2rad(lat)
@@ -489,12 +489,12 @@ def earthrad(lat, lat_unit='deg', model='wgs84'):
         raise ValueError('Input unit unknown')
 
     if(model=='wgs84'):
-        Rew = wgs84.R0/(1-(wgs84.ecc*np.sin(lat))**2)**0.5
-        Rns = wgs84.R0*(1-wgs84.ecc**2)/(1-(wgs84.ecc*np.sin(lat))**2)**1.5
+        R_N = wgs84.a/(1-wgs84._ecc_sqrd*np.sin(lat)**2)**0.5
+        R_M = wgs84.a*(1-wgs84._ecc_sqrd)/(1-wgs84._ecc_sqrd*np.sin(lat)**2)**1.5
     else:
         raise ValueError('Model unknown')
     
-    return Rew, Rns
+    return R_N, R_M
 
 def lla2ecef(lat,lon,alt,latlon_unit='deg',alt_unit='m',model='wgs84'):
     """
@@ -520,7 +520,7 @@ def lla2ecef(lat,lon,alt,latlon_unit='deg',alt_unit='m',model='wgs84'):
     if(model=='wgs84'):
         Rew,Rns = earthrad(lat,lat_unit=latlon_unit)
     else:
-        Rew = wgs84.R0
+        Rew = wgs84.a 
     
     if(latlon_unit=='deg'):
         lat = np.deg2rad(lat)
@@ -528,7 +528,7 @@ def lla2ecef(lat,lon,alt,latlon_unit='deg',alt_unit='m',model='wgs84'):
     
     x = (Rew + alt)*np.cos(lat)*np.cos(lon)
     y = (Rew + alt)*np.cos(lat)*np.sin(lon)
-    z = ( (1-wgs84.ecc**2)*Rew + alt )*np.sin(lat)
+    z = ( (1-wgs84._ecc_sqrd)*Rew + alt )*np.sin(lat)
 
     ecef = np.vstack((x,y,z)).T
 
@@ -561,7 +561,7 @@ def ecef2lla(ecef,latlon_unit='deg'):
 
     # Iteration to get Latitude and Altitude
     p = np.sqrt(x**2 + y**2)
-    lat = np.arctan2(z,p*(1-wgs84.ecc**2))
+    lat = np.arctan2(z,p*(1-wgs84._ecc_sqrd))
 
     err = np.ones(N)
 
@@ -569,7 +569,7 @@ def ecef2lla(ecef,latlon_unit='deg'):
         Rew,Rns = earthrad(lat,lat_unit='rad')
         h = p/np.cos(lat) - Rew
         
-        err = np.arctan2(z*(1+wgs84.ecc**2*Rew*np.sin(lat)/z),p) - lat
+        err = np.arctan2(z*(1+wgs84._ecc_sqrd*Rew*np.sin(lat)/z),p) - lat
         
         lat = lat + err
     
