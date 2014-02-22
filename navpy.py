@@ -1,6 +1,102 @@
 import numpy as np
 import wgs84
 
+def angle2dcm(rotAngle1,rotAngle2,rotAngle3,input_unit='rad',rotation_sequence='ZYX',output_type='ndrarray'):
+    """
+    This function converts Euler Angle into DCM.
+    Input:
+    e: Euler Angle in radian, 1x3, in the following order
+    [Roll Pitch Yaw]
+    Output:
+    C: Direction Cosine Matrix, 3x3
+    Programmer:    Adhika Lie
+    Created:    	 May 03, 2011
+    Last Modified: May 10, 2011
+    
+    May 10 - Fix bug on each rotation matrix
+    """
+    R3 = np.zeros((3,3))
+    R2 = np.zeros((3,3))
+    R1 = np.zeros((3,3))
+    
+    if(input_unit=='deg'):
+        rotAngle1 = np.deg2rad(rotAngle1)
+        rotAngle2 = np.deg2rad(rotAngle2)
+        rotAngle3 = np.deg2rad(rotAngle3)
+    
+    R3[2,2] = 1.0;
+    R3[0,0] = np.cos(rotAngle1); R3[0,1] = np.sin(rotAngle1)
+    R3[1,0] =-np.sin(rotAngle1); R3[1,1] = np.cos(rotAngle1)
+    
+    R2[1,1] = 1.0
+    R2[0,0] = np.cos(rotAngle2); R2[0,2] =-np.sin(rotAngle2)
+    R2[2,0] = np.sin(rotAngle2); R2[2,2] = np.cos(rotAngle2)
+    
+    R1[0,0] = 1.0
+    R1[1,1] = np.cos(rotAngle3); R1[1,2] = np.sin(rotAngle3)
+    R1[2,1] =-np.sin(rotAngle3); R1[2,2] = np.cos(rotAngle3)
+    
+    C = R1.dot(R2.dot(R3))
+    
+    if(output_type=='matrix'):
+        C = np.matrix(C)
+    
+    return C
+
+def dcm2angle(C,output_unit='rad',rotation_sequence='ZYX'):
+    """
+    """
+    if(C.shape[0]!=C.shape[1]):
+        raise ValueError('Matrix is not square')
+    if(C.shape[0]!=3):
+        raise ValueError('Matrix is not 3x3')
+
+    if(rotation_sequence=='ZYX'):
+        rotAngle1 = np.arctan2(C[0,1],C[0,0])  # Yaw
+        rotAngle2 = -np.arcsin(C[0,2]) # Pitch
+        rotAngle3 = np.arctan2(C[1,2],C[2,2]) # Roll
+
+    if(output_unit=='deg'):
+        rotAngle1 = np.rad2deg(rotAngle1)
+        rotAngle2 = np.rad2deg(rotAngle2)
+        rotAngle3 = np.rad2deg(rotAngle3)
+
+    return rotAngle1, rotAngle2, rotAngle3
+
+def omega2rates(phi,theta,input_unit='rad',output_type='ndarray'):
+    """
+    This function is used to create the transformation matrix to get
+    phi_dot, the_dot and psi_dot from given pqr (body rate).
+    Input:
+    e: Euler Angle in the format of [phi the psi];
+    Output:
+    R: Transformation matrix, numpy array 3x3
+    Programmer:    Adhika Lie
+    Created:    	 May 13, 2011
+    Last Modified: May 13, 2011
+    """
+    R = np.zeros((3,3))
+    if(input_unit=='deg'):
+        phi = np.deg2rad(phi)
+        theta = np.deg2rad(theta)
+    
+    R[0,0] = 1.0
+    R[0,1] = np.sin(phi)*np.tan(theta)
+    R[0,2] = np.cos(phi)*np.tan(theta)
+    
+    R[1,0] = 0.0
+    R[1,1] = np.cos(phi)
+    R[1,2] = -np.sin(phi)
+    
+    R[2,0] = 0.0
+    R[2,1] = np.sin(phi)/np.cos(theta)
+    R[2,2] = np.cos(phi)/np.cos(theta)
+    
+    if(output_type=='matrix'):
+        R = np.matrix(R)
+    
+    return R
+
 def angle2quat(rotAngle1,rotAngle2,rotAngle3,
                 input_unit='rad',rotation_sequence='ZYX'):
     """
@@ -177,10 +273,14 @@ def quat2angle(q0,qvec,output_unit='rad',rotation_sequence='ZYX'):
 
     if(N0!=Nvec):
         raise ValueError('Inputs are not of same dimensions')
-    
-    q1 = qvec[:,0]
-    q2 = qvec[:,1]
-    q3 = qvec[:,2]
+    if(N0 == 1):
+        q1 = qvec[0]
+        q2 = qvec[1]
+        q3 = qvec[2]
+    else:
+        q1 = qvec[:,0]
+        q2 = qvec[:,1]
+        q3 = qvec[:,2]
 
     rotAngle1 = np.zeros(N0)
     rotAngle2 = np.zeros(N0)
@@ -199,10 +299,6 @@ def quat2angle(q0,qvec,output_unit='rad',rotation_sequence='ZYX'):
     else:
         raise ValueError('rotation_sequence unknown')
 
-    if(N0 == 1):
-        rotAngle1 = rotAngle1[0]
-        rotAngle2 = rotAngle2[0]
-        rotAngle3 = rotAngle3[0]
     if(output_unit=='deg'):
         rotAngle1 = np.rad2deg(rotAngle1)
         rotAngle2 = np.rad2deg(rotAngle2)
@@ -676,6 +772,16 @@ def skew(w,output_type='ndarray'):
         C = np.matrix(C)
 
     return C
+
+def wrapToPi(e):
+    """
+    Wraping angle to [-pi,pi] interval
+    """
+    dum,N = input_check_Nx1(e)
+    
+    ew = np.mod(e+np.pi,2*np.pi)-np.pi
+
+    return ew
 
 def input_check_Nx1(x):
     x = np.atleast_1d(x)
