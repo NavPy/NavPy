@@ -122,6 +122,7 @@ def angle2dcm(yaw, pitch, roll, input_units='rad', rotation_sequence='321'):
     >>> from nav import angle2dcm
     >>> g_ned = np.matrix([[0, 0, 9.8]]).T # gravity vector in NED frame
     >>> yaw, pitch, roll = np.deg2rad([90, 15, 0]) # vehicle orientation
+    >>> Rnav2body = angle2dcm(yaw, pitch, roll)
     >>> g_body = Rnav2body * g_ned
     >>> g_body
     matrix([[-2.53642664],
