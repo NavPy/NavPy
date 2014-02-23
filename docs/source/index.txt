@@ -6,7 +6,8 @@
 Welcome to NavPy's documentation!
 =================================
 
-This will be NavPy's documentation site.  
+This will be NavPy's documentation site.
+(under construction)
 
 Contents:
 
