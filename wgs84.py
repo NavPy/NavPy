@@ -13,6 +13,9 @@ by the WGS 84 rublished report.  Available parameters:
        _ecc: first eccentricity
   _ecc_sqrd: first eccentricity squared
 
+Copyright (c) 2014 NavPy Developers. All rights reserved.
+Use of this source code is governed by a BSD-style license that can be found in
+LICENSE.txt
 
 Reference
 ---------
