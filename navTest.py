@@ -48,17 +48,21 @@ class TestNavClass(unittest.TestCase):
         Note: N, E (+) and S, W (-)
         """
         # Sydney Australia
-        lat = -np.deg2rad( 33. + 53./60 + 28.15/3600) # South
-        lon = +np.deg2rad(151. + 14./60 + 57.07/3600) # East
+        lat = -( 33. + 53./60 + 28.15/3600) # South
+        lon = +(151. + 14./60 + 57.07/3600) # East
         alt = 86.26 # [meters]
         
+        # Note: The book's example only seems reliable to 2 digits passed
+        #       decimal.  For example, ecef_x is recorded as xxx.571, but
+        #       even using the books equation (2.7 and 2.9) you get xxx.572555
         ecef = [-4.646678571e6, 2.549341033e6, -3.536478881e6] # [meters]
         
         # Do conversion and check result
-        ecef_computed = nav.lla2ecef([lat, lon, alt])
+        # Note: default units are deg
+        ecef_computed = navpy.lla2ecef(lat, lon, alt)
         
         for e1, e2 in zip(ecef_computed, ecef):
-            self.assertAlmostEqual(e1, e2, places=3)    
+            self.assertAlmostEqual(e1, e2, places=2)    
 
     def test_ecef2lla_Ausralia(self):
         """
@@ -122,17 +126,20 @@ class TestNavClass(unittest.TestCase):
         Note: N, E (+) and S, W (-)
         """
         # Pretoria S. Africa
-        lat = -np.deg2rad(26. + 8./60 + 42.20/3600) # South
-        lon = -np.deg2rad(28. + 3./60 +  0.92/3600) # West
+        lat = -(26. + 8./60 + 42.20/3600) # South
+        lon = +(28. + 3./60 +  0.92/3600) # East
         alt = 1660.86 # [meters]
         
         ecef = [5.057590377e6, 2.694861463e6, -2.794229000e6] # [meters]
         
         # Do conversion and check result
-        ecef_computed = nav.lla2ecef([lat, lon, alt])
+        # Note: default units are degrees
+        ecef_computed = navpy.lla2ecef(lat, lon, alt)
         
+        # Note: see comment in test_lla2ecef_Ausralia() as to why
+        #       only 2 digits of accuracy is being tested for the example.
         for e1, e2 in zip(ecef_computed, ecef):
-            self.assertAlmostEqual(e1, e2, places=3)    
+            self.assertAlmostEqual(e1, e2, places=2)    
     
     def test_lla2ecef(self):
         """
@@ -142,14 +149,15 @@ class TestNavClass(unittest.TestCase):
                      Sensors, Jay A. Farrel 2008
         """
         # Near Los Angeles, CA 
-        lat = +np.deg2rad(34.  +  0./60 + 0.00174/3600) # North
-        lon = -np.deg2rad(117. + 20./60 + 0.84965/3600) # West
+        lat = +(34.  +  0./60 + 0.00174/3600) # North
+        lon = -(117. + 20./60 + 0.84965/3600) # West
         alt = 251.702 # [meters]
 
         ecef = [-2430601.828, -4702442.703, 3546587.358] # [meters]
         
         # Do conversion and check result
-        ecef_computed = nav.lla2ecef([lat, lon, alt])
+        # Note: default units are degrees
+        ecef_computed = navpy.lla2ecef(lat, lon, alt)
         
         for e1, e2 in zip(ecef_computed, ecef):
             self.assertAlmostEqual(e1, e2, places=3)

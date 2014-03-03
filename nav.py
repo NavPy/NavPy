@@ -439,35 +439,6 @@ def get_pqr_rel(lla,VG_NED,e,om):
 	return pqr_rel;
 
 
-###################### COORDINATE TRANSFORMATION #######################
-# Function lla2ecef
-def lla2ecef(lla):
-	"""
-	This function calculates the ECEF Coordinate given the Latitude,
-	Longitude and Altitude.
-	
-	Using WGS-84.
-	Input:
-		lla: Array of [lat, lon, alt], [1x3] numpy array.
-	Output: In tuples:
-		ecef: Array of [Xe, Ye, Ze], [1x3] numpy array.
-	Programmer:    Adhika Lie
-	Created:    	 May 03, 2011
-	Last Modified: May 03, 2011
-	"""
-	
-	lat = lla[0]; lon = lla[1]; h = lla[2];
-	
-	R = earthrad(lat);
-	
-	x = (R[0]+h)*cos(lat)*cos(lon);
-	y = (R[0]+h)*cos(lat)*sin(lon);
-	z = ((1.0-ecc**2)*R[0]+h)*sin(lat);
-	
-	ecef = numpy.array([x, y, z]);
-	return ecef;
-
-
 ###################### MISCELLANEOUS FUNCTION ##########################
 def sk(w):
 	"""

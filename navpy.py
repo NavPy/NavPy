@@ -598,7 +598,7 @@ def earthrad(lat, lat_unit='deg', model='wgs84'):
     
     return R_N, R_M
 
-def lla2ecef(lat,lon,alt,latlon_unit='deg',alt_unit='m',model='wgs84'):
+def lla2ecef(lat, lon, alt, latlon_unit='deg', alt_unit='m', model='wgs84'):
     """
     Convert Latitude, Longitude, Altitude, to ECEF position
     
@@ -632,7 +632,7 @@ def lla2ecef(lat,lon,alt,latlon_unit='deg',alt_unit='m',model='wgs84'):
     y = (Rew + alt)*np.cos(lat)*np.sin(lon)
     z = ( (1-wgs84._ecc_sqrd)*Rew + alt )*np.sin(lat)
 
-    ecef = np.vstack((x,y,z)).T
+    ecef = np.hstack((x,y,z))
 
     return ecef
 
