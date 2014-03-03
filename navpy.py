@@ -636,9 +636,11 @@ def lla2ecef(lat,lon,alt,latlon_unit='deg',alt_unit='m',model='wgs84'):
 
     return ecef
 
-def ecef2lla(ecef,latlon_unit='deg'):
+def ecef2lla(ecef, latlon_unit='deg'):
     """
-    Convert ECEF to Lat, Lon, Alt
+    Calculate the Latitude, Longitude and Altitude of a point located on earth 
+    given the ECEF Coordinates.
+    
     Reference: Jekeli, C.,"Inertial Navigation Systems With Geodetic
     Applications", Walter de Gruyter, New York, 2001, pp. 24
     
@@ -667,7 +669,7 @@ def ecef2lla(ecef,latlon_unit='deg'):
 
     err = np.ones(N)
 
-    while(np.max(np.abs(err))>1e-14):
+    while(np.max(np.abs(err))>1e-10):
         Rew,Rns = earthrad(lat,lat_unit='rad')
         h = p/np.cos(lat) - Rew
         

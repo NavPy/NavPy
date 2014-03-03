@@ -467,46 +467,6 @@ def lla2ecef(lla):
 	ecef = numpy.array([x, y, z]);
 	return ecef;
 
-# Function ecef2lla
-def ecef2lla(ecef):
-	"""
-	This function calculates the Latitude, Longitude and Altitude of a
-	point located on earth given the ECEF Coordinate.
-	
-	Using WGS-84.
-	Input:
-		ecef: Array of [Xe, Ye, Ze], [1x3] numpy array.
-	Output: In tuples:
-		lla: Array of [lat, lon, alt], [1x3] numpy array.
-	Programmer:    Adhika Lie
-	Created:    	 May 03, 2011
-	Last Modified: May 03, 2011
-	
-	Reference: Jekeli, C.,"Inertial Navigation Systems With Geodetic 
-	         Applications", Walter de Gruyter, New York, 2001, pp. 24
-	"""
-	
-	x = ecef[0]; y = ecef[1]; z = ecef[2];
-	lon = atan2(y,x);
-	
-	# Iteration
-	p = sqrt(x**2+y**2);
-	#Initial Guess
-	lat = atan2(z,p*(1-ecc**2));
-	#print 'Latitude guess is ', lat/pi*180;
-	
-	err = 1;
-	while (fabs(err)>1e-14):
-		R = earthrad(lat);
-		h = p/cos(lat) - R[0];
-		#print 'Altitude is ', h, 'm';
-		err = atan2(z*(1+ecc**2*R[0]*sin(lat)/z),p) - lat;
-		lat = lat + err;
-		#print err;
-	
-	lla = numpy.array([lat, lon, h]);
-	return lla;
-
 
 ###################### MISCELLANEOUS FUNCTION ##########################
 def sk(w):
