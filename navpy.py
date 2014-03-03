@@ -631,8 +631,11 @@ def lla2ecef(lat, lon, alt, latlon_unit='deg', alt_unit='m', model='wgs84'):
     x = (Rew + alt)*np.cos(lat)*np.cos(lon)
     y = (Rew + alt)*np.cos(lat)*np.sin(lon)
     z = ( (1-wgs84._ecc_sqrd)*Rew + alt )*np.sin(lat)
+    
+    ecef = np.vstack((x,y,z)).T
 
-    ecef = np.hstack((x,y,z))
+    if(N1==1):
+        ecef = ecef.reshape(3)
 
     return ecef
 
