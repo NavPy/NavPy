@@ -507,45 +507,6 @@ def ecef2lla(ecef):
 	lla = numpy.array([lat, lon, h]);
 	return lla;
 
-# Function ecef2ned
-def ecef2ned(ecef,ecef_ref):
-	"""
-	This function converts a vector in ecef to ned coordinate centered
-	at ecef_ref.
-	Input: 
-	  ecef: Original vector in ECEF, 3x1
-	  ecef_ref: Center for NED Coordinate, 3x1
-	Output:
-	  ned: Transformed vector in NED, 3x1
-	Programmer:    Adhika Lie
-	Created:       May 03, 2011
-	Last Modified: May 21, 2011
-	May 21 - Corrected syntax error of numpy.dot.
-	"""
-	
-	C = numpy.zeros((3,3));
-	ned = numpy.zeros((3,1));
-	
-	lla_ref = ecef2lla(ecef_ref);
-	lat = lla_ref[0];
-	lon = lla_ref[1];
-	
-	# DCM FOR ECEF TO NED
-	C[0,0]=-sin(lat)*cos(lon); 
-	C[0,1]=-sin(lat)*sin(lon); 
-	C[0,2]=cos(lat);
-	
-	C[1,0]=-sin(lon); 
-	C[1,1]= cos(lon); 
-	C[1,2]= 0;
-	
-	C[2,0]=-cos(lat)*cos(lon); 
-	C[2,1]=-cos(lat)*sin(lon); 
-	C[2,2]=-sin(lat);
-	
-	ned = numpy.dot(C,ecef);
-	
-	return ned;
 
 ###################### MISCELLANEOUS FUNCTION ##########################
 def sk(w):

@@ -1,5 +1,6 @@
 #!/usr/bin/python
-import nav
+import nav # TODO (Hamid) this eventually be removed... we are migrating to navpy
+import navpy
 import unittest
 import numpy as np
 assert_almost_equal = np.testing.assert_almost_equal
@@ -13,6 +14,30 @@ Tests to Add
 class TestNavClass(unittest.TestCase):
 
     #def setUp(self):
+
+    def test_ecef2ned(self):
+        """
+        Test conversion from ECEF to NED.
+        
+        Data Source: Examples 2.1 and 2.4 of Aided Navigation: GPS with High
+                     Rate Sensors, Jay A. Farrel 2008
+        Note: N, E (+) and S, W (-)
+        """
+        # A point near Los Angeles, CA, given from equation 2.12 [degrees]
+        lat = +( 34. +  0./60 + 0.00174/3600) # North
+        lon = -(117. + 20./60 + 0.84965/3600) # West
+        alt = 251.702 # [meters]
+
+        # Define example ECEF vector and associated NED, given in Example 2.4
+        ecef = np.array([0.3808, 0.7364, -0.5592])
+        ned  = np.array([0, 0, 1]) # local unit gravity
+        
+        # Do conversion and check result
+        # Note: default assumption on units is deg and meters
+        ned_computed = navpy.ecef2ned(ecef, lat, lon, alt) 
+        
+        for e1, e2 in zip(ned_computed, ned):
+            self.assertAlmostEqual(e1, e2, places=3)
 
     def test_lla2ecef_Ausralia(self):
         """
