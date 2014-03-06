@@ -420,16 +420,16 @@ class TestNavClass(unittest.TestCase):
         # Match won't be perfect because Rnav2body is rounded.
         np.testing.assert_almost_equal([yaw_C, pitch_C, roll_C], [yaw, pitch, roll], decimal=4)
         
-    def test_sk(self):
+    def test_skew(self):
         """
         Test formation of skew symmetric matrix.
         """
         rho = np.array([1, 2, 3])      
-        rho_x_expected = np.matrix([[     0 , -rho[2],  rho[1]],
+        rho_x_expected = np.array([[     0 , -rho[2],  rho[1]],
                                     [ rho[2],      0 , -rho[0]],
                                     [-rho[1],  rho[0],      0 ]])
                                     
-        np.testing.assert_almost_equal(rho_x_expected, nav.sk(rho))
+        np.testing.assert_almost_equal(rho_x_expected, navpy.skew(rho))
         
     def test_euler2tilt_errors(self):
         """
