@@ -185,7 +185,74 @@ class TestNavClass(unittest.TestCase):
             self.assertAlmostEqual(e1, e2, places=8)
             
         self.assertAlmostEqual(lla_computed[2], alt, places=3)
-            
+    
+    def test_ecef2lla_vector(self):
+        """
+        Test conversion of multiple ECEF to LLA
+        
+        Data Source: Pretoria and Sydney, Exercise 2.4 and 2.5 of
+                     Aided Navigation: GPS with High Rate Sensors, Jay A. Farrel
+                     2008
+        """
+        ecef_pretoria = [5.057590377e6, 2.694861463e6, -2.794229000e6]#in meters
+        
+        lat_pretoria = -(26. + 8./60 + 42.20/3600) # South
+        lon_pretoria = +(28. + 3./60 +  0.92/3600) # East
+        alt_pretoria = 1660.86 # [meters]
+        
+        ecef_sydney = [-4.646678571e6, 2.549341033e6, -3.536478881e6] #in meters
+    
+        lat_sydney = -( 33. + 53./60 + 28.15/3600) # South
+        lon_sydney = +(151. + 14./60 + 57.07/3600) # East
+        alt_sydney = 86.26 # [meters]
+        
+        ecef = np.vstack((ecef_pretoria,ecef_sydney))
+        
+        lat = [lat_pretoria,lat_sydney]
+        lon = [lon_pretoria,lon_sydney]
+        alt = [alt_pretoria,alt_sydney]
+        
+        # Do conversion and check result
+        lat_comp,lon_comp,alt_comp = navpy.ecef2lla(ecef)
+    
+        # Testing accuracy for lat, lon
+        np.testing.assert_almost_equal(lat_comp,lat,decimal=8)
+        np.testing.assert_almost_equal(lon_comp,lon,decimal=8)
+        np.testing.assert_almost_equal(alt_comp,alt,decimal=2)
+    
+    def test_lla2ecef_vector(self):
+        """
+        Test conversion of multiple LLA to ECEF
+        
+        Data Source: Pretoria and Sydney, Exercise 2.4 and 2.5 of
+                     Aided Navigation: GPS with High Rate Sensors, Jay A. Farrel
+                     2008
+        """
+        ecef_pretoria = [5.057590377e6, 2.694861463e6, -2.794229000e6]#in meters
+        
+        lat_pretoria = -(26. + 8./60 + 42.20/3600) # South
+        lon_pretoria = +(28. + 3./60 +  0.92/3600) # East
+        alt_pretoria = 1660.86 # [meters]
+        
+        ecef_sydney = [-4.646678571e6, 2.549341033e6, -3.536478881e6] #in meters
+        
+        lat_sydney = -( 33. + 53./60 + 28.15/3600) # South
+        lon_sydney = +(151. + 14./60 + 57.07/3600) # East
+        alt_sydney = 86.26 # [meters]
+
+        lat = np.array([lat_pretoria,lat_sydney])
+        lon = [lon_pretoria,lon_sydney]
+        alt = [alt_pretoria,alt_sydney]
+    
+        ecef = np.vstack((ecef_pretoria,ecef_sydney))
+        
+        # Do conversion and check result
+        ecef_computed = navpy.lla2ecef(lat,lon,alt)
+    
+        # Note: see comment in test_lla2ecef_Ausralia() as to why
+        #       only 2 digits of accuracy is being tested for the example.
+        np.testing.assert_almost_equal(ecef_computed,ecef,decimal=2)
+    
     def test_omega2rates_trivial(self):
         """
         Test conversion of pqr to Euler angle rates.  
@@ -278,8 +345,8 @@ class TestNavClass(unittest.TestCase):
         
         # Current problem: Demoz converts +/- 180 degrees to +pi
         
-        np.testing.assert_almost_equal(angles1_wrap_expected, nav.wrap_pi(angles1), decimal=5)
-        np.testing.assert_almost_equal(angles2_wrap_expected, nav.wrap_pi(angles2), decimal=5)
+        np.testing.assert_almost_equal(angles1_wrap_expected, navpy.wrapToPi(angles1), decimal=5)
+        np.testing.assert_almost_equal(angles2_wrap_expected, navpy.wrapToPi(angles2), decimal=5)
         
         # Boundry Conditions - current implementation is kinda unintuitive for boundry
         # conditions.  These tests can be added later to impose desired behavior
@@ -302,7 +369,7 @@ class TestNavClass(unittest.TestCase):
                                         [ 0.968207,  0.109785,  0.224770],
                                         [-0.218509, -0.066226,  0.973585]])
 
-        Rnav2body_computed = nav.angle2dcm(yaw, pitch, roll)
+        Rnav2body_computed = navpy.angle2dcm(yaw, pitch, roll)
         
         np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
         
@@ -310,6 +377,26 @@ class TestNavClass(unittest.TestCase):
         yaw_deg, pitch_deg, roll_deg = np.rad2deg([yaw, pitch, roll])
         Rnav2body_computed = nav.angle2dcm(yaw_deg, pitch_deg, roll_deg, input_units='deg')
         np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
+    
+    def test_dcm2angle(self):
+        """
+        Test deriving Euler angles from body -> nav transformation matrix
+        (transpose of DCM).
+        
+        This test simply creates a DCM, transposes it (to get body -> nav) and
+        attempts to recover the original angles.
+        """
+        # Define (expected) Euler angles and associated DCM (Rnav2body)
+        yaw, pitch, roll = [-83, 2.3, 13] # degrees
+        
+        Rnav2body = np.array([[ 0.121771, -0.991747, -0.040132],
+                               [ 0.968207,  0.109785,  0.224770],
+                               [-0.218509, -0.066226,  0.973585]])
+    
+        yaw_C, pitch_C, roll_C = navpy.dcm2angle(Rnav2body, output_unit='deg')
+                               
+        # Match won't be perfect because Rnav2body is rounded.
+        np.testing.assert_almost_equal([yaw_C, pitch_C, roll_C], [yaw, pitch, roll], decimal=4)
     
     def test_Rbody2nav_to_angle(self):
         """

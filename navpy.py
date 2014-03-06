@@ -9,17 +9,31 @@ import wgs84
 
 def angle2dcm(rotAngle1,rotAngle2,rotAngle3,input_unit='rad',rotation_sequence='ZYX',output_type='ndrarray'):
     """
-    This function converts Euler Angle into DCM.
-    Input:
-    e: Euler Angle in radian, 1x3, in the following order
-    [Roll Pitch Yaw]
-    Output:
-    C: Direction Cosine Matrix, 3x3
+    This function converts Euler Angle into Direction Cosine Matrix (DCM).
+    The DCM is described by three sucessive rotation rotAngle1, rotAngle2, and 
+    rotAngle3 about the axis described by the rotation_sequence.
+    
+    The default rotation_sequence='ZYX' is the aerospace sequence and rotAngle1
+    is the yaw angle, rotAngle2 is the pitch angle, and rotAngle3 is the roll
+    angle. In this case DCM transforms a vector from the locally level 
+    coordinate frame (i.e. the NED frame) to the body frame.
+    
+    Parameters
+    ----------
+    rotAngle1, rotAngle2, rotAngle3:  angles
+    They are a sequence of angles about successive axes described by
+    rotation_sequence.
+    input_unit: {'rad', 'deg'}, optional. Rotation angles. Default is 'rad'.
+    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
+    output_type: {'ndarray','matrix'}, optional. Output type. Default is 'ndarray'.
+    
+    Returns
+    --------
+    C: {3x3} Direction Cosine Matrix
+    
     Programmer:    Adhika Lie
     Created:    	 May 03, 2011
-    Last Modified: May 10, 2011
-    
-    May 10 - Fix bug on each rotation matrix
+    Last Modified: March 06, 2013
     """
     R3 = np.zeros((3,3))
     R2 = np.zeros((3,3))
@@ -51,6 +65,30 @@ def angle2dcm(rotAngle1,rotAngle2,rotAngle3,input_unit='rad',rotation_sequence='
 
 def dcm2angle(C,output_unit='rad',rotation_sequence='ZYX'):
     """
+    This function converts a Direction Cosine Matrix (DCM) into the three
+    rotation angles.
+    The DCM is described by three sucessive rotation rotAngle1, rotAngle2, and
+    rotAngle3 about the axis described by the rotation_sequence.
+    
+    The default rotation_sequence='ZYX' is the aerospace sequence and rotAngle1
+    is the yaw angle, rotAngle2 is the pitch angle, and rotAngle3 is the roll
+    angle. In this case DCM transforms a vector from the locally level
+    coordinate frame (i.e. the NED frame) to the body frame.
+    
+    Parameters
+    ----------
+    C: direction consine matrix that rotates the vector from the first frame
+       to the second frame according to the specified rotation_sequence.
+    output_unit: {'rad', 'deg'}, optional. Rotation angles. Default is 'rad'.
+    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
+    
+    Returns
+    -------
+    rotAngle1, rotAngle2, rotAngle3:  angles
+            They are a sequence of angles about successive axes described by
+            rotation_sequence.
+    
+    
     """
     if(C.shape[0]!=C.shape[1]):
         raise ValueError('Matrix is not square')
