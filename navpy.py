@@ -590,6 +590,101 @@ def llarate(VN,VE,VD,lat,alt,lat_unit='deg',alt_unit='m'):
 
     return lla_dot
 
+def earthrate(lat, lat_unit = 'deg', model='wgs84'):
+    """
+    Calculate the earth rotation rate resolved on NED axis 
+    given VN, VE, VD, lat, and alt.
+    
+    Paul Groves's Notation: :math:`\omega_{IE}^N`, Eq. (2.75), Ch. 2.3, pp. 44
+    
+    References
+    ----------
+    P. Groves, GNSS, Inertial, and Integrated Navigation Systems, Artech House, 2008
+    
+    Parameters
+    ----------
+    lat: {(N,)} array like latitudes, unit specified in lat_unit, default deg
+    
+    Return
+    ------
+    e: {(N,3)} np.array of the earth's rotation rate
+    The unit is in rad/seconds.
+    """
+    if(lat_unit=='deg'):
+        lat = np.deg2rad(lat)
+    elif(lat_unit=='rad'):
+        pass
+    else:
+        raise ValueError('Input unit unknown')
+
+    lat,N = input_check_Nx1(lat)
+
+    e = np.zeros((N,3))
+    if(model=='wgs84'):
+        e[:,0] = wgs84.omega_E*np.cos(lat)
+        e[:,1] = -wgs84.omega_E*np.sin(lat)
+    else:
+        raise ValueError('Model unknown')
+
+    if(N==1):
+        e = e.reshape(3)
+
+    return e
+
+def navrate(VN, VE, VD,lat, alt, lat_unit='deg', alt_unit='m', model='wgs84'):
+    """
+    Calculate navigation/transport rate given VN, VE, VD, lat, and alt.
+    Navigation/transport rate is the angular velocity of the NED frame relative
+    to the earth ECEF frame. 
+    Paul Groves's Notation: :math:`\omega_{EN}^N`, Eq. (5.37), Ch. 5.3, pp. 131
+    
+    References
+    ----------
+    P. Groves, GNSS, Inertial, and Integrated Navigation Systems, Artech House, 2008
+    
+    Parameters
+    ----------
+    VN: {(N,)} array like earth relative velocity in the North direction, m/s
+    VE: {(N,)} array like earth relative velocity in the East direction, m/s
+    VD: {(N,)} array like earth relative velocity in the Down direction, m/s
+    lat: {(N,)} array like latitudes, unit specified in lat_unit, default deg
+    alt: {(N,)} array like altitudes, unit specified in alt_unit, default m
+    
+    Return
+    ------
+    rho: {(N,3)} np.array of the transport rate.
+    The unit is in rad/seconds.
+    
+    Calls
+    -----
+    earthrad
+    """
+
+    lat,N1 = input_check_Nx1(lat)
+    alt,N2 = input_check_Nx1(alt)
+    VN, N3 = input_check_Nx1(VN)
+    VE, N4 = input_check_Nx1(VE)
+    VD, N5 = input_check_Nx1(VD)
+
+    if((N1!=N2) or (N2!=N3) or (N1!=N3) or (N1!=N4) or (N4!=N5)):
+        raise ValueError('Inputs are not of the same dimension')
+
+    Rew, Rns = earthrad(lat,lat_unit=lat_unit)
+
+    rho = np.zeros((N1,3))
+
+    if(model=='wgs84'):
+        rho[:,0] = VE/(Rew+alt)
+        rho[:,1] = -VN/(Rns+alt)
+        rho[:,2] = -VE*np.tan(np.deg2rad(lat))/(Rew+alt)
+    else:
+        raise ValueError('Model unknown')
+
+    if(N1==1):
+        rho = rho.reshape(3)
+
+    return rho
+
 def earthrad(lat, lat_unit='deg', model='wgs84'):
     """
     Calculate radius of curvature in the prime vertical (East-West) and 
