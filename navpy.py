@@ -820,6 +820,37 @@ def ecef2lla(ecef, latlon_unit='deg'):
     return lat, lon, h
 
 
+def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg', alt_unit='m', model='wgs84'):
+    """
+    Convert Latitude, Longitude, Altitude to its resolution in the NED
+    coordinate. The center of the NED coordiante is given by lat_ref, lon_ref,
+    and alt_ref.
+    
+    For example, this can be used to convert GPS data to a local NED frame.
+    
+    Parameters
+    ----------
+    lat: {(N,)} array like latitude, unit specified by latlon_unit, default in deg
+    lon: {(N,)} array like longitude, unit specified by latlon_unit, default in deg
+    alt: {(N,)} array like altitude, unit specified by alt_unit, default in m
+    
+    lat_ref: Reference latitude, unit specified by latlon_unit, default in deg
+    lon_ref: Reference longitude, unit specified by latlon_unit, default in deg
+    alt: Reference altitude, unit specified by alt_unit, default in m
+    
+    Returns
+    -------
+    ned: {(N,3)} array like ecef position, unit is the same as alt_unit        
+    """
+    ecef  = navpy.lla2ecef(lat, lon, alt, latlon_unit=latlon_unit, 
+                           alt_unit=alt_unit, model=model)
+    ecef0 = navpy.lla2ecef(lat_ref, lon_ref, alt_ref,
+                           latlon_unit=latlon_unit, 
+                           alt_unit=alt_unit, model=model)
+    ned  = navpy.ecef2ned(ecef-ecef0, lat_ref, lon_ref, alt_ref, 
+                          latlon_unit=latlon_unit, alt_unit=alt_unit, model=model)
+    return ned
+
 def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='wgs84'):
     """
     Transform a vector resolved in ECEF coordinate to its resolution in the NED

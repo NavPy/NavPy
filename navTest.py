@@ -15,6 +15,14 @@ class TestNavClass(unittest.TestCase):
 
     #def setUp(self):
 
+    #def test_lla2ned(self):
+    #    """
+    #    Test conversino from LLA to NED.
+    #    """
+    #    TODO (Hamid) find appropriate test data for this function.
+
+
+
     def test_ecef2ned(self):
         """
         Test conversion from ECEF to NED.
