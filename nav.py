@@ -7,61 +7,6 @@ from nav_CONSTANT import *
 
 ######################## ATTITUDE TOOLBOX ##############################
 # Functino att2body
-
-def euler2tilt_errors(yaw, pitch, roll, input_units='rad', rotation_sequence='321'):
-    """
-    Returns a transformation matrix to convert from Euler Angle error states
-    (delta_roll, delta_pitch, delta_yaw) to tilt angle (about NED frame) error 
-    states (e_north, e_east, e_down).  Mathematically:
-    
-    [tilt errors] = Omega_T * [Euler angle errors]
- 
-    Parameters
-    ----------   
-    yaw   : yaw angle, units of input_units.
-    pitch : pitch angle, units of input_units.
-    roll  : roll angle , units of input_units.
-    input_units: units for input angles {'rad', 'deg'}, optional.
-    rotationSequence: assumed rotation sequence {'321', others can be 
-                                                implemented in the future}.
-    Returns
-    -------
-    Omega_T: 3x3 transformation matrix (numpy matrix data type).  This can be
-               used to convert Euler angle error states to tilt angle errors.
-    
-    Note
-    ----
-    This is NOT a proper transformation matrix (i.e it is not normal + unitary).
-    
-    Reference
-    ---------
-    Equation 2.80, Aided Navigation: GPS with High Rate Sensors, Jay A. Farrel 2008
-    """
-    # Apply necessary unit transformations.
-    if input_units == 'rad':
-        pass
-    elif input_units == 'deg':
-        yaw, pitch, roll = np.radians([yaw, pitch, roll])
-
-    # Build transformation matrix Rnav2body.
-    s_p, c_p = sin(pitch), cos(pitch)
-    s_y, c_y = sin(yaw)  , cos(yaw)
-    
-    if rotation_sequence == '321':
-        # The assumed Euler Angle sequence is '321'
-        Omega_T = np.matrix([
-                    [c_p*c_y, -s_y, 0],
-                    [c_p*s_y,  c_y, 0],
-                    [   -s_p,    0, 1]], dtype=float)
-
-    else: 
-        # No other rotation sequence is currently implemented
-        print('WARNING (euler2tilt_errors): assumed rotation_sequence is unavailable.')
-        print('                     NaN returned.')
-        Omega_T = np.nan
-    
-    return Omega_T
-    
     
 
 def att2body(eul_radians):

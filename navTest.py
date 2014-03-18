@@ -439,26 +439,6 @@ class TestNavClass(unittest.TestCase):
                                     
         np.testing.assert_almost_equal(rho_x_expected, navpy.skew(rho))
         
-    def test_euler2tilt_errors(self):
-        """
-        Test formation of transformation from Euler Angle error states to tilt
-        angle error states.
-        
-        This test simply checks if the formed matrix matches the expected
-        version.  The expected version was manually created in IPython based
-        on the reference equation 2.80 in Jay Farrell.
-        """
-        # Define Euler angles ('321')
-        yaw, pitch, roll = [0.7, 0.1, 0.0] # radians, (note: roll isn't used.)
-
-        Omega_T_expected = np.matrix([[ 0.76102116, -0.64421769,  0.],
-                                      [ 0.64099928,  0.76484219,  0.],
-                                      [-0.09983342,  0.        ,  1.]])
-        
-        Omega_T = nav.euler2tilt_errors(yaw, pitch, roll)
-        
-        # Match won't be perfect because Rnav2body is rounded.
-        np.testing.assert_almost_equal(Omega_T_expected, Omega_T, decimal=7)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestNavClass)
