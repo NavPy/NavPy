@@ -107,39 +107,92 @@ def dcm2angle(C,output_unit='rad',rotation_sequence='ZYX'):
 
     return rotAngle1, rotAngle2, rotAngle3
 
-def omega2rates(phi,theta,input_unit='rad',output_type='ndarray'):
+def omega2rates(pitch, roll, input_unit='rad', euler_angles_order='roll_pitch_yaw', output_type='ndarray'):
     """
-    This function is used to create the transformation matrix to get
-    phi_dot, the_dot and psi_dot from given pqr (body rate).
-    Input:
-    e: Euler Angle in the format of [phi the psi];
-    Output:
-    R: Transformation matrix, numpy array 3x3
-    Programmer:    Adhika Lie
-    Created:    	 May 13, 2011
-    Last Modified: May 13, 2011
+    This function is used to create the transformation matrix to go from:
+	    [p, q, r] --> [roll_rate, pitch_rate, yaw_rate]
+    where pqr are xyz body rotation-rate measurements expressed in body frame.
+    Yaw, pitch, and roll are the Euler angles.  We assume the Euler angles are
+    3-2-1 (i.e Yaw -> Pitch -> Roll) transformations that go from navigation-
+    frame to body-frame.
+
+    Parameters
+    ----------
+    pitch : pitch angle, units of input_unit.
+    roll  : roll angle , units of input_unit.
+    input_unit: units for input angles {'rad', 'deg'}, optional.
+    euler_angles_order: assumed order of Euler Angles attitude state vector
+                        {'roll_pitch_yaw', 'yaw_pitch_roll'} (see ``Notes``).
+    output_type: numpy array (default) or matrix {'ndarray' or 'matrix'}
+    
+    Returns
+    -------
+    R: transformation matrix, from xyz body-rate to Euler angle-rates
+       numpy 'output_type' 3x3 (Note: default return variable is an ARRAY, not a matrix)
+        
+    Notes
+    -----
+    Since the returned transformation matrix is used to transform one vector
+    to another, the assumed attitude variables order matters.  
+    The ``euler_angles_order`` parameter can be used to specify the assumed order.
+
+    The difference is demonstrated by example:
+        # By default euler_angles_order='roll_pitch_yaw'
+        R = omega2rates(pitch, roll) 
+        [ roll_rate]         [omega_x]
+        [pitch_rate] = dot(R,[omega_y])
+        [  yaw_rate]         [omega_z]
+
+        # Now assume our attitude state is [yaw, pitch, roll].T
+        R = omega2rates(pitch, roll, euler_angles_order='yaw_pitch_roll') 
+        [ yaw_rate]          [omega_x]
+        [pitch_rate] = dot(R,[omega_y])
+        [ roll_rate]         [omega_z]	
+
+    Reference
+    ---------
+    [1] Equation 2.74, Aided Navigation: GPS with High Rate Sensors, Jay A. Farrel 2008
+    [2] omega2rates.m function at:
+    http://www.gnssapplications.org/downloads/chapter7/Chapter7_GNSS_INS_Functions.tar.gz
     """
-    R = np.zeros((3,3))
-    if(input_unit=='deg'):
-        phi = np.deg2rad(phi)
-        theta = np.deg2rad(theta)
+    # Apply necessary unit transformations.
+    if input_unit == 'rad':
+        pitch_rad, roll_rad = pitch, roll
+    elif input_unit == 'deg':
+        pitch_rad, roll_rad = np.radians([pitch, roll])
+
+    # Build transformation matrix.
+    s_r, c_r = np.sin( roll_rad), np.cos( roll_rad)
+    s_p, c_p = np.sin(pitch_rad), np.cos(pitch_rad)
     
-    R[0,0] = 1.0
-    R[0,1] = np.sin(phi)*np.tan(theta)
-    R[0,2] = np.cos(phi)*np.tan(theta)
-    
-    R[1,0] = 0.0
-    R[1,1] = np.cos(phi)
-    R[1,2] = -np.sin(phi)
-    
-    R[2,0] = 0.0
-    R[2,1] = np.sin(phi)/np.cos(theta)
-    R[2,2] = np.cos(phi)/np.cos(theta)
-    
-    if(output_type=='matrix'):
+    # Check for singularities (i.e. pitch near 90 degrees)
+    singular_tol = 1e-2; # flags anything between [90 +/- .5 deg]
+    if abs(c_p) < singular_tol:
+        print('WARNING (omega2rates): Operating near pitch = 90 deg singularity.  NaN returned. ')
+        return np.nan
+
+    if euler_angles_order == 'roll_pitch_yaw':
+        R = np.array(
+           [[  1, s_r*s_p/c_p,  c_r*s_p/c_p],
+            [  0, c_r        , -s_r        ],
+            [  0, s_r/c_p    ,  c_r/c_p    ]], dtype=float)
+    elif euler_angles_order == 'yaw_pitch_roll':
+        R = np.array(
+           [[  0, s_r/c_p    ,  c_r/c_p    ],
+            [  0, c_r        , -s_r        ],
+            [  1, s_r*s_p/c_p,  c_r*s_p/c_p]], dtype=float)
+
+    if output_type == 'ndarray':
+        pass
+    elif output_type=='matrix':
         R = np.matrix(R)
-    
+    else:
+        print("WARNING (omega2rates): Unrecognized 'output_type' requested.")
+        print("NaN is returned.")
+        return np.nan
+        
     return R
+    
 
 def angle2quat(rotAngle1,rotAngle2,rotAngle3,
                 input_unit='rad',rotation_sequence='ZYX'):

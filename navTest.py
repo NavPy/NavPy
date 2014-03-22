@@ -275,7 +275,7 @@ class TestNavClass(unittest.TestCase):
                      [1,0,0],
                      [0,1,0],
                      [0,0,1]])
-        R_computed = nav.omega2rates(0, 0)
+        R_computed = navpy.omega2rates(0, 0)
         self.assertTrue((R_expected == R_computed).all())
         
         ## ... and when order is yaw_pitch_roll
@@ -283,7 +283,7 @@ class TestNavClass(unittest.TestCase):
                      [0,0,1],
                      [0,1,0],
                      [1,0,0]])
-        R_computed = nav.omega2rates(0, 0, euler_angles_order='yaw_pitch_roll')
+        R_computed = navpy.omega2rates(0, 0, euler_angles_order='yaw_pitch_roll')
         self.assertTrue((R_expected == R_computed).all())
         
     def test_omega2rates_units(self):
@@ -302,18 +302,18 @@ class TestNavClass(unittest.TestCase):
                      [1, -0.0302162,   0.5765590],
                      [0,  0.9986295,   0.0523360],
                      [0, -0.0604324,   1.1531181]])
-        R_computed = nav.omega2rates(pitch_rad, roll_rad)
+        R_computed = navpy.omega2rates(pitch_rad, roll_rad)
         np.testing.assert_almost_equal(R_expected, R_computed)
         
         ## ... and when input is in degrees.
-        R_computed = nav.omega2rates(pitch_deg, roll_deg, input_units='deg')
+        R_computed = navpy.omega2rates(pitch_deg, roll_deg, input_unit='deg')
         np.testing.assert_almost_equal(R_expected, R_computed)
         
         ## ... and when order is yaw_pitch_roll
         R_expected = np.array([R_expected[2,:], 
                                R_expected[1,:], 
                                R_expected[0,:]])
-        R_computed = nav.omega2rates(pitch_rad, roll_rad, euler_angles_order='yaw_pitch_roll')
+        R_computed = navpy.omega2rates(pitch_rad, roll_rad, euler_angles_order='yaw_pitch_roll')
         np.testing.assert_almost_equal(R_expected, R_computed)
         
     def test_omega2rates_singularities(self):
@@ -328,13 +328,13 @@ class TestNavClass(unittest.TestCase):
                      [1, -2.9983249,   57.2114477],
                      [0,  0.9986295,    0.0523360],
                      [0, -2.9987817,   57.2201626]])
-        R_computed = nav.omega2rates(pitch_rad, roll_rad)
+        R_computed = navpy.omega2rates(pitch_rad, roll_rad)
         np.testing.assert_almost_equal(R_expected, R_computed)
         
         # Test singlarity and ensure NaN returned
         pitch_rad, roll_rad = np.radians(89.6), np.radians(-3)
         # Test near, but not at, singularity
-        R_computed = nav.omega2rates(pitch_rad, roll_rad)
+        R_computed = navpy.omega2rates(pitch_rad, roll_rad)
         self.assertTrue(R_computed is np.nan)        
                                
     def test_wrap_pi(self):
