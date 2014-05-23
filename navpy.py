@@ -895,12 +895,12 @@ def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg', alt_uni
     -------
     ned: {(N,3)} array like ecef position, unit is the same as alt_unit        
     """
-    ecef  = navpy.lla2ecef(lat, lon, alt, latlon_unit=latlon_unit, 
+    ecef  = lla2ecef(lat, lon, alt, latlon_unit=latlon_unit, 
                            alt_unit=alt_unit, model=model)
-    ecef0 = navpy.lla2ecef(lat_ref, lon_ref, alt_ref,
+    ecef0 = lla2ecef(lat_ref, lon_ref, alt_ref,
                            latlon_unit=latlon_unit, 
                            alt_unit=alt_unit, model=model)
-    ned  = navpy.ecef2ned(ecef-ecef0, lat_ref, lon_ref, alt_ref, 
+    ned  = ecef2ned(ecef-ecef0, lat_ref, lon_ref, alt_ref, 
                           latlon_unit=latlon_unit, alt_unit=alt_unit, model=model)
     return ned
 

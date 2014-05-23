@@ -15,13 +15,32 @@ class TestNavClass(unittest.TestCase):
 
     #def setUp(self):
 
-    #def test_lla2ned(self):
-    #    """
-    #    Test conversino from LLA to NED.
-    #    """
-    #    TODO (Hamid) find appropriate test data for this function.
+    def test_lla2ned(self):
+        """
+        Test conversion from LLA to NED.
+        
+        Data Source: Example generated using book GNSS Applications and Methods
+                     Chapter 7 library functions: wgslla2xyz.m, wgsxyz2enu
+        """
+        # A point near Los Angeles, CA
+        lat_ref = +( 34. +  0./60 + 0.00174/3600) # North
+        lon_ref = -(117. + 20./60 + 0.84965/3600) # West
+        alt_ref = 251.702 # [meters]  
+        
+        # Point near by with known NED position
+        lat = +(34.  + 0./60 + 0.19237/3600) # North
+        lon = -(117. +20./60 + 0.77188/3600) # West
+        alt =  234.052 # [meters]
+        
+        ned = [5.8738, 1.9959, 17.6498]
 
-
+        # Do conversion and check result
+        # Note: default assumption on units is deg and meters
+        ned_computed = navpy.lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref)
+        
+        for e1, e2 in zip(ned_computed, ned):
+            self.assertAlmostEqual(e1, e2, places=3)        
+        
 
     def test_ecef2ned(self):
         """
@@ -383,7 +402,7 @@ class TestNavClass(unittest.TestCase):
         
         # Test units feature
         yaw_deg, pitch_deg, roll_deg = np.rad2deg([yaw, pitch, roll])
-        Rnav2body_computed = nav.angle2dcm(yaw_deg, pitch_deg, roll_deg, input_units='deg')
+        Rnav2body_computed = navpy.angle2dcm(yaw_deg, pitch_deg, roll_deg, input_unit='deg')
         np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
     
     def test_dcm2angle(self):
