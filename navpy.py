@@ -6,6 +6,8 @@ LICENSE.txt
 
 import numpy as np
 import wgs84
+from utils import input_check_Nx3 as _input_check_Nx3
+from utils import input_check_Nx1 as _input_check_Nx1
 
 def angle2dcm(rotAngle1,rotAngle2,rotAngle3,input_unit='rad',rotation_sequence='ZYX',output_type='ndrarray'):
     """
@@ -256,9 +258,9 @@ def angle2quat(rotAngle1,rotAngle2,rotAngle3,
     """
     
     # INPUT CHECK
-    rotAngle1,N1 = input_check_Nx1(rotAngle1)
-    rotAngle2,N2 = input_check_Nx1(rotAngle2)
-    rotAngle3,N3 = input_check_Nx1(rotAngle3)
+    rotAngle1,N1 = _input_check_Nx1(rotAngle1)
+    rotAngle2,N2 = _input_check_Nx1(rotAngle2)
+    rotAngle3,N3 = _input_check_Nx1(rotAngle3)
     
     if( (N1!=N2) | (N1!=N3) | (N2!=N3) ):
         raise ValueError('Inputs are not of same dimensions')
@@ -365,8 +367,8 @@ def quat2angle(q0,qvec,output_unit='rad',rotation_sequence='ZYX'):
     >>> phi
     array([ -6.06200867e-07,   5.00000036e+00,   1.00000001e+01])
     """
-    q0, N0 = input_check_Nx1(q0)
-    qvec, Nvec = input_check_Nx3(qvec)
+    q0, N0 = _input_check_Nx1(q0)
+    qvec, Nvec = _input_check_Nx3(qvec)
 
     if(N0!=Nvec):
         raise ValueError('Inputs are not of same dimensions')
@@ -441,8 +443,8 @@ def quat2dcm(q0,qvec,rotation_sequence='ZYX',output_type='ndarray'):
             [  1.63132160e-01,   5.93160200e-02,   9.84972420e-01]])
     """
     # Input check
-    q0,N0 = input_check_Nx1(q0)
-    qvec,Nvec = input_check_Nx3(qvec)
+    q0,N0 = _input_check_Nx1(q0)
+    qvec,Nvec = _input_check_Nx3(qvec)
 
     if((N0!=1) | (Nvec!=1)):
         raise ValueError('Can only process 1 quaternion')
@@ -545,16 +547,16 @@ def qmult(p0,pvec,q0,qvec):
     (array([ 0.76217346,  0.83099626]), array([[-0.59673664,  0.24912539,  0.03053588], [ 0.19222498, -0.1456937 , -0.50125456]]))
     """
     
-    p0,Np = input_check_Nx1(p0)
-    q0,Nq = input_check_Nx1(q0)
+    p0,Np = _input_check_Nx1(p0)
+    q0,Nq = _input_check_Nx1(q0)
     if(Np!=Nq):
         raise ValueError('Inputs are not of the same dimension')
     
-    pvec,Np = input_check_Nx3(pvec)
+    pvec,Np = _input_check_Nx3(pvec)
     if(Np!=Nq):
         raise ValueError('Inputs are not of the same dimension')
 
-    qvec,Nq = input_check_Nx3(qvec)
+    qvec,Nq = _input_check_Nx3(qvec)
     if(Np!=Nq):
         raise ValueError('Inputs are not of the same dimension')
     
@@ -610,17 +612,17 @@ def llarate(VN,VE,VD,lat,alt,lat_unit='deg',alt_unit='m'):
     >>> # That output was in rad/sec
     """
     dim_check = 1
-    VN, N1 = input_check_Nx1(VN)
-    VE, N2 = input_check_Nx1(VE)
+    VN, N1 = _input_check_Nx1(VN)
+    VE, N2 = _input_check_Nx1(VE)
     if(N2!=N1):
         dim_check *= 0
-    VD, N2 = input_check_Nx1(VD)
+    VD, N2 = _input_check_Nx1(VD)
     if(N2!=N1):
         dim_check *= 0
-    lat,N2 = input_check_Nx1(lat)
+    lat,N2 = _input_check_Nx1(lat)
     if(N2!=N1):
         dim_check *= 0
-    alt,N2 = input_check_Nx1(alt)
+    alt,N2 = _input_check_Nx1(alt)
     if(N2!=N1):
         dim_check *= 0
     if(dim_check==0):
@@ -670,7 +672,7 @@ def earthrate(lat, lat_unit = 'deg', model='wgs84'):
     else:
         raise ValueError('Input unit unknown')
 
-    lat,N = input_check_Nx1(lat)
+    lat,N = _input_check_Nx1(lat)
 
     e = np.zeros((N,3))
     if(model=='wgs84'):
@@ -713,11 +715,11 @@ def navrate(VN, VE, VD,lat, alt, lat_unit='deg', alt_unit='m', model='wgs84'):
     earthrad
     """
 
-    lat,N1 = input_check_Nx1(lat)
-    alt,N2 = input_check_Nx1(alt)
-    VN, N3 = input_check_Nx1(VN)
-    VE, N4 = input_check_Nx1(VE)
-    VD, N5 = input_check_Nx1(VD)
+    lat,N1 = _input_check_Nx1(lat)
+    alt,N2 = _input_check_Nx1(alt)
+    VN, N3 = _input_check_Nx1(VN)
+    VE, N4 = _input_check_Nx1(VE)
+    VD, N5 = _input_check_Nx1(VD)
 
     if((N1!=N2) or (N2!=N3) or (N1!=N3) or (N1!=N4) or (N4!=N5)):
         raise ValueError('Inputs are not of the same dimension')
@@ -798,9 +800,9 @@ def lla2ecef(lat, lon, alt, latlon_unit='deg', alt_unit='m', model='wgs84'):
     -------
     ecef: {(N,3)} array like ecef position, unit is the same as alt_unit
     """
-    lat,N1 = input_check_Nx1(lat)
-    lon,N2 = input_check_Nx1(lon)
-    alt,N3 = input_check_Nx1(alt)
+    lat,N1 = _input_check_Nx1(lat)
+    lon,N2 = _input_check_Nx1(lon)
+    alt,N3 = _input_check_Nx1(alt)
     
     if( (N1!=N2) or (N2!=N3) or (N1!=N3) ):
         raise ValueError('Inputs are not of the same dimension')
@@ -844,7 +846,7 @@ def ecef2lla(ecef, latlon_unit='deg'):
     lon = {(N,)} array like longitude in unit specified by latlon_unit
     alt = {(N,)} array like altitude in meters
     """
-    ecef,N = input_check_Nx3(ecef)
+    ecef,N = _input_check_Nx3(ecef)
     if(N>1):
         x = ecef[:,0]; y = ecef[:,1]; z = ecef[:,2]
     else:
@@ -927,14 +929,14 @@ def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='
     >>> from navpy import ecef2ned
     >>> lat 
     """
-    lat_ref,N1 = input_check_Nx1(lat_ref)
-    lon_ref,N2 = input_check_Nx1(lon_ref)
-    alt_ref,N3 = input_check_Nx1(alt_ref)
+    lat_ref,N1 = _input_check_Nx1(lat_ref)
+    lon_ref,N2 = _input_check_Nx1(lon_ref)
+    alt_ref,N3 = _input_check_Nx1(alt_ref)
     
     if( (N1!=1) or (N2!=1) or (N3!=1) ):
         raise ValueError('Reference Location can only be 1')
     
-    ecef,N = input_check_Nx3(ecef)
+    ecef,N = _input_check_Nx3(ecef)
 
     ecef = ecef.T
     
@@ -989,7 +991,7 @@ def skew(w,output_type='ndarray'):
            [ 3.,  0., -1.],\
            [-2.,  1.,  0.]])
     """
-    w,N = input_check_Nx1(w)
+    w,N = _input_check_Nx1(w)
     if(N!=3):
         raise ValueError('Input dimension is not 3')
     
@@ -1005,41 +1007,8 @@ def wrapToPi(e):
     """
     Wraping angle to [-pi,pi] interval
     """
-    dum,N = input_check_Nx1(e)
+    dum,N = _input_check_Nx1(e)
     
     ew = np.mod(e+np.pi,2*np.pi)-np.pi
 
     return ew
-
-def input_check_Nx1(x):
-    x = np.atleast_1d(x)
-    theSize = np.shape(x)
-
-    if(len(theSize)>1):
-        #1. Input must be of size N x 1
-        if ((theSize[0]!=1) & (theSize[1]!=1)):
-            raise ValueError('Not an N x 1 array')
-        #2. Make it into a 1-D array
-        x = x.reshape(np.size(x))
-    elif (theSize[0]==1):
-        x = x[0]
-    
-    return x,np.size(x)
-
-def input_check_Nx3(x):
-    x = np.atleast_2d(x)
-    theSize = np.shape(x)
-    
-    if(len(theSize)>1):
-        #1. Input must be of size N x 3
-        if ((theSize[0]!=3) & (theSize[1]!=3)):
-            raise ValueError('Not a N x 3 array')
-        #2. Make it into a Nx3 array
-        if (theSize[1]!=3):
-            x = x.T
-        N = x.shape[0]
-        #3. If N == 1, make it into a 1-D array
-        if (x.shape[0]==1):
-            x = x.reshape(x.shape[1])
-
-    return x,N
