@@ -65,15 +65,24 @@ def loadtxt2dic(filename):
     """
     fid = open(filename,'r')
     param = {}
+    prev_line = ''
+    
     for line in fid:
         # Remove Extra Spaces
-        line = line.strip()
-        
+        line = prev_line + line.strip()
+        print line
         # Skip lines beginning with # or blank
         # Note: Python treats '' as False
         if(line.startswith('#') or line.startswith('\n') or (not line)):
             continue
         
+        # If line ends with a comma, it continues to the next line.
+        if(line.endswith(',')):
+            prev_line = line.strip()
+            continue
+        else:
+            prev_line = ''
+            
         # Split item
         item = line.split('#',1)[0].strip() # May have comment after the line
         item = item.replace(':',' ').replace('=',' ').split(None,1)
