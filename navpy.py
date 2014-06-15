@@ -6,8 +6,6 @@ LICENSE.txt
 
 import numpy as np
 import wgs84
-from utils import input_check_Nx3 as _input_check_Nx3
-from utils import input_check_Nx1 as _input_check_Nx1
 
 def angle2dcm(rotAngle1,rotAngle2,rotAngle3,input_unit='rad',rotation_sequence='ZYX',output_type='ndrarray'):
     """
@@ -1021,3 +1019,46 @@ def wrapToPi(e):
     ew = np.mod(e+np.pi,2*np.pi)-np.pi
 
     return ew
+
+def _input_check_Nx1(x):
+    """
+    Check x to be of dimension Nx1 and reshape it as a 1-D array
+    
+    Adhika Lie
+    """
+    x = np.atleast_1d(x)
+    theSize = np.shape(x)
+
+    if(len(theSize)>1):
+        #1. Input must be of size N x 1
+        if ((theSize[0]!=1) & (theSize[1]!=1)):
+            raise ValueError('Not an N x 1 array')
+        #2. Make it into a 1-D array
+        x = x.reshape(np.size(x))
+    elif (theSize[0]==1):
+        x = x[0]
+    
+    return x,np.size(x)
+
+def _input_check_Nx3(x):
+    """
+    Check x to be of dimension Nx3
+    
+    Adhika Lie
+    """
+    x = np.atleast_2d(x)
+    theSize = np.shape(x)
+    
+    if(len(theSize)>1):
+        #1. Input must be of size N x 3
+        if ((theSize[0]!=3) & (theSize[1]!=3)):
+            raise ValueError('Not a N x 3 array')
+        #2. Make it into a Nx3 array
+        if (theSize[1]!=3):
+            x = x.T
+        N = x.shape[0]
+        #3. If N == 1, make it into a 1-D array
+        if (x.shape[0]==1):
+            x = x.reshape(x.shape[1])
+
+    return x,N
