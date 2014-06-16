@@ -1000,7 +1000,7 @@ def skew(w,output_type='ndarray'):
            [ 3.,  0., -1.],\
            [-2.,  1.,  0.]])
     """
-    w,N = _input_check_Nx1(w)
+    w,N = _input_check_Nx1(np.array(w))
     if(N!=3):
         raise ValueError('Input dimension is not 3')
     

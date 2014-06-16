@@ -430,9 +430,9 @@ class TestNavClass(unittest.TestCase):
         np.testing.assert_almost_equal([yaw_C, pitch_C, roll_C], [yaw, pitch, roll], decimal=4)
     
         
-    def test_skew(self):
+    def test_skew_array(self):
         """
-        Test formation of skew symmetric matrix.
+        Test formation of skew symmetric matrix from 1D array input
         """
         rho = np.array([1, 2, 3])      
         rho_x_expected = np.array([[     0 , -rho[2],  rho[1]],
@@ -441,7 +441,60 @@ class TestNavClass(unittest.TestCase):
                                     
         np.testing.assert_almost_equal(rho_x_expected, navpy.skew(rho))
         
+    def test_skew_list(self):
+        """
+        Test formation of skew symmetric matrix from 1D list input
+        """
+        rho = [1, 2, 3]
+        rho_x_expected = np.array([[     0 , -rho[2],  rho[1]],
+                                    [ rho[2],      0 , -rho[0]],
+                                    [-rho[1],  rho[0],      0 ]])
+                                    
+        np.testing.assert_almost_equal(rho_x_expected, navpy.skew(rho))
 
+    def test_skew_matrix(self):
+        """
+        Test formation of skew symmetric matrix from matrix input
+        """
+        rho = np.matrix([1, 2, 3])
+        rho_x_expected = np.array([[     0 , -rho[0,2],  rho[0,1]],
+                                    [ rho[0,2],      0 , -rho[0,0]],
+                                    [-rho[0,1],  rho[0,0],      0 ]])
+                                    
+        np.testing.assert_almost_equal(rho_x_expected, navpy.skew(rho))
+
+    def test_inputcheckNx1_list(self):
+        """
+        Test Nx1 input checking function for list input
+        """
+        rho = [1, 2, 3]
+        rho_expect, N_expect = np.array([1, 2, 3]), 3
+        np.testing.assert_almost_equal(rho_expect, navpy._input_check_Nx1(rho)[0])
+        np.testing.assert_almost_equal(N_expect, navpy._input_check_Nx1(rho)[1])
+    
+    def test_inputcheckNx1_array(self):
+        """
+        Test input checking function for a valid 2D array input
+        """
+        rho = np.array([[1], [2], [3]])
+        rho_expect, N_expect = np.array([1, 2, 3]), 3
+        np.testing.assert_almost_equal(rho_expect, navpy._input_check_Nx1(rho)[0])
+        np.testing.assert_almost_equal(N_expect, navpy._input_check_Nx1(rho)[1])
+        
+    def test_inputcheckNx1_invalid_array(self):
+        """
+        Test input checking function for invalid 2D array input
+        """
+        rho = np.array([[1,2], [3,4], [5,6]])
+        self.assertRaises(ValueError,navpy._input_check_Nx1,rho)
+    
+    def test_inputcheckNx1_invalid_list(self):
+        """
+        Test input checking function for invalid 2D array input
+        """
+        rho = [[1,2], [3,4], [5,6]]
+        self.assertRaises(ValueError,navpy._input_check_Nx1,rho)
+        
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestNavClass)
     unittest.TextTestRunner(verbosity=2).run(suite)    
