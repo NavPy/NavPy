@@ -89,8 +89,17 @@ def dcm2angle(C,output_unit='rad',rotation_sequence='ZYX'):
     rotAngle1, rotAngle2, rotAngle3:  angles
             They are a sequence of angles about successive axes described by
             rotation_sequence.
+            
+    Notes
+    -----
+    The returned rotAngle1 and 3 will be between   +/- 180 deg (+/- pi rad).
+    In contrast, rotAngle2 will be in the interval +/- 90 deg (+/- pi/2 rad).
     
-    
+    In the 'ZYX' or '321' aerospace sequence, that means the pitch angle
+    returned will always be inside the closed interval +/- 90 deg (+/- pi/2 rad).
+    Applications where pitch angles near or larger than 90 degrees in magnitude
+    are expected should used alternate attitude parameterizations like
+    quaternions.
     """
     if(C.shape[0]!=C.shape[1]):
         raise ValueError('Matrix is not square')
