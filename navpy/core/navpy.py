@@ -22,17 +22,22 @@ def angle2dcm(rotAngle1,rotAngle2,rotAngle3,input_unit='rad',rotation_sequence='
     
     Parameters
     ----------
-    rotAngle1, rotAngle2, rotAngle3:  angles
-    They are a sequence of angles about successive axes described by
-    rotation_sequence.
-    input_unit: {'rad', 'deg'}, optional. Rotation angles. Default is 'rad'.
-    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
-    output_type: {'ndarray','matrix'}, optional. Output type. Default is 'ndarray'.
+    rotAngle1, rotAngle2, rotAngle3 :  angles
+            They are a sequence of angles about successive axes described by
+            rotation_sequence.
+    input_unit : {'rad', 'deg'}, optional
+            Rotation angles. Default is 'rad'.
+    rotation_sequence : {'ZYX'}, optional
+            Rotation sequences. Default is 'ZYX'.
+    output_type : {'ndarray','matrix'}, optional
+            Output type. Default is 'ndarray'.
     
     Returns
     --------
-    C: {3x3} Direction Cosine Matrix
+    C : {3x3} Direction Cosine Matrix
     
+    Notes
+    -----
     Programmer:    Adhika Lie
     Created:    	 May 03, 2011
     Last Modified: March 06, 2013
@@ -79,14 +84,16 @@ def dcm2angle(C,output_unit='rad',rotation_sequence='ZYX'):
     
     Parameters
     ----------
-    C: direction consine matrix that rotates the vector from the first frame
-       to the second frame according to the specified rotation_sequence.
-    output_unit: {'rad', 'deg'}, optional. Rotation angles. Default is 'rad'.
-    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
+    C : direction consine matrix that rotates the vector from the first frame
+        to the second frame according to the specified rotation_sequence.
+    output_unit : {'rad', 'deg'}, optional
+            Rotation angles. Default is 'rad'.
+    rotation_sequence : {'ZYX'}, optional
+            Rotation sequences. Default is 'ZYX'.
     
     Returns
     -------
-    rotAngle1, rotAngle2, rotAngle3:  angles
+    rotAngle1, rotAngle2, rotAngle3 :  angles
             They are a sequence of angles about successive axes described by
             rotation_sequence.
             

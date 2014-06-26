@@ -7,13 +7,19 @@ Welcome to NavPy's documentation!
 =================================
 
 This will be NavPy's documentation site.
-(under construction)
+(under construction).  Visit later!
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
+Auto Generate
+=============
+
+.. autofunction:: navpy.angle2dcm
+
+.. autofunction:: navpy.dcm2angle
 
 Indices and tables
 ==================
