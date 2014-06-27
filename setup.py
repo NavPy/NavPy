@@ -16,8 +16,7 @@ setup (
     packages = find_packages(),
     install_requires=[
         'numpy>1.7.1',
-        'scipy',
-        'matplotlib>=1.1',
+        'scipy'
     ],
     provides="navpy",
     license="BSD",
