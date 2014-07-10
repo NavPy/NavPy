@@ -129,6 +129,7 @@ def omega2rates(pitch, roll, input_unit='rad', euler_angles_order='roll_pitch_ya
     """
     This function is used to create the transformation matrix to go from:
 	    [p, q, r] --> [roll_rate, pitch_rate, yaw_rate]
+
     where pqr are xyz body rotation-rate measurements expressed in body frame.
     Yaw, pitch, and roll are the Euler angles.  We assume the Euler angles are
     3-2-1 (i.e Yaw -> Pitch -> Roll) transformations that go from navigation-
@@ -138,15 +139,16 @@ def omega2rates(pitch, roll, input_unit='rad', euler_angles_order='roll_pitch_ya
     ----------
     pitch : pitch angle, units of input_unit.
     roll  : roll angle , units of input_unit.
-    input_unit: units for input angles {'rad', 'deg'}, optional.
-    euler_angles_order: assumed order of Euler Angles attitude state vector
-                        {'roll_pitch_yaw', 'yaw_pitch_roll'} (see ``Notes``).
-    output_type: numpy array (default) or matrix {'ndarray' or 'matrix'}
+    input_unit : units for input angles {'rad', 'deg'}, optional
+    euler_angles_order : {'roll_pitch_yaw', 'yaw_pitch_roll'}, optional
+        Assumed order of Euler Angles attitude state vector (see ``Notes``).
+    output_type : {'ndarray' or 'matrix'}, optional
+        Numpy array (default) or matrix 
     
     Returns
     -------
-    R: transformation matrix, from xyz body-rate to Euler angle-rates
-       numpy 'output_type' 3x3 (Note: default return variable is an ARRAY, not a matrix)
+    R : transformation matrix, from xyz body-rate to Euler angle-rates
+        numpy 'output_type' 3x3 (Note: default return variable is an ARRAY, not a matrix)
         
     Notes
     -----
@@ -155,21 +157,23 @@ def omega2rates(pitch, roll, input_unit='rad', euler_angles_order='roll_pitch_ya
     The ``euler_angles_order`` parameter can be used to specify the assumed order.
 
     The difference is demonstrated by example:
-        # By default euler_angles_order='roll_pitch_yaw'
+
+        By default euler_angles_order='roll_pitch_yaw'
         R = omega2rates(pitch, roll) 
         [ roll_rate]         [omega_x]
         [pitch_rate] = dot(R,[omega_y])
         [  yaw_rate]         [omega_z]
 
-        # Now assume our attitude state is [yaw, pitch, roll].T
+        Now assume our attitude state is [yaw, pitch, roll].T
         R = omega2rates(pitch, roll, euler_angles_order='yaw_pitch_roll') 
         [ yaw_rate]          [omega_x]
         [pitch_rate] = dot(R,[omega_y])
         [ roll_rate]         [omega_z]	
 
-    Reference
-    ---------
+    References
+    ----------
     [1] Equation 2.74, Aided Navigation: GPS with High Rate Sensors, Jay A. Farrel 2008
+
     [2] omega2rates.m function at:
     http://www.gnssapplications.org/downloads/chapter7/Chapter7_GNSS_INS_Functions.tar.gz
     """
@@ -224,26 +228,27 @@ def angle2quat(rotAngle1,rotAngle2,rotAngle3,
     
     Parameters
     ----------
-    rotAngle1, rotAngle2, rotAngle3: {(N,), (N,1), or (1,N)} angles
-            They are a sequence of angles about successive axes described by 
-            rotation_sequence.
-    input_unit: {'rad', 'deg'}, optional. Rotation angles. Default is 'rad'.
-    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
+    rotAngle1, rotAngle2, rotAngle3 : {(N,), (N,1), or (1,N)}
+        They are a sequence of angles about successive axes described by rotation_sequence.
+    input_unit : {'rad', 'deg'}, optional
+        Rotation angles. Default is 'rad'.
+    rotation_sequence : {'ZYX'}, optional 
+        Rotation sequences. Default is 'ZYX'.
     
     Returns
     -------
-    q0: {(N,)} array like scalar componenet of the quaternion
-    qvec:{(N,3)} array like vector component of the quaternion
+    q0 : {(N,)} array like scalar componenet of the quaternion
+    qvec : {(N,3)} array like vector component of the quaternion
     
     Notes
     -----
     Convert rotation angles to unit quaternion that transfroms a vector in F1 to
     F2 according to
     
-    :math: `v_q^{F2} = q^{-1} \otimes v_q^{F1} \otimes q`
+    :math:`v_q^{F2} = q^{-1} \otimes v_q^{F1} \otimes q`
     
-    :math:`\otimes` indicates the quaternion multiplcation and :math:`\v_q^F`
-    is a pure quaternion representation of the vector :math:`\v_q^F`. The scalar
+    where :math:`\otimes` indicates the quaternion multiplcation and :math:`v_q^F`
+    is a pure quaternion representation of the vector :math:`v_q^F`. The scalar
     componenet of :math:`v_q^F` is zero.
     For aerospace sequence ('ZYX'): rotAngle1 = psi, rotAngle2 = the,
     and rotAngle3 = phi
@@ -325,26 +330,30 @@ def quat2angle(q0,qvec,output_unit='rad',rotation_sequence='ZYX'):
     
     Parameters
     ----------
-    q0: {(N,), (N,1), or (1,N)} array like scalar componenet of the quaternion
-    qvec:{(N,3),(3,N)} array like vector component of the quaternion
-    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
+    q0 : {(N,), (N,1), or (1,N)} array_like 
+        Scalar componenet of the quaternion
+    qvec : {(N,3),(3,N)} array_like 
+        Vector component of the quaternion
+    rotation_sequence : {'ZYX'}, optional
+        Rotation sequences. Default is 'ZYX'.
 
     Returns
     -------
-    rotAngle1, rotAngle2, rotAngle3: {(N,), (N,1), or (1,N)} angles
-    They are a sequence of angles about successive axes described by
-    rotation_sequence.
-    output_unit: {'rad', 'deg'}, optional. Rotation angles. Default is 'rad'.
+    rotAngle1, rotAngle2, rotAngle3 : {(N,), (N,1), or (1,N)} array_like
+        They are a sequence of angles about successive axes described by
+        rotation_sequence.
+    output_unit : {'rad', 'deg'}, optional
+        Rotation angles. Default is 'rad'.
     
     Notes
     -----
     Convert rotation angles to unit quaternion that transfroms a vector in F1 to
     F2 according to
     
-    :math: `v_q^{F2} = q^{-1} \otimes v_q^{F1} \otimes q`
+    :math:`v_q^{F2} = q^{-1} \otimes v_q^{F1} \otimes q`
     
-    :math:`\otimes` indicates the quaternion multiplcation and :math:`\v_q^F`
-    is a pure quaternion representation of the vector :math:`\v_q^F`. The scalar
+    where :math:`\otimes` indicates the quaternion multiplcation and :math:`v_q^F`
+    is a pure quaternion representation of the vector :math:`v_q^F`. The scalar
     componenet of :math:`v_q^F` is zero.
     For aerospace sequence ('ZYX'): rotAngle1 = psi, rotAngle2 = the, 
     and rotAngle3 = phi
@@ -427,16 +436,19 @@ def quat2dcm(q0,qvec,rotation_sequence='ZYX',output_type='ndarray'):
     
     Parameters
     ----------
-    q0: {(N,), (N,1), or (1,N)} array like scalar componenet of the quaternion
-    qvec:{(N,3),(3,N)} array like vector component of the quaternion
-    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
-    output_type: {'ndarray','matrix'}, optional. Output is either numpy array
-            (default) or numpy matrix.
+    q0 : {(N,), (N,1), or (1,N)} array_like 
+        Scalar componenet of the quaternion
+    qvec : {(N,3),(3,N)} array_like 
+        Vector component of the quaternion
+    rotation_sequence : {'ZYX'}, optional
+        Rotation sequences. Default is 'ZYX'.
+    output_type : {'ndarray','matrix'}, optional
+        Output is either numpy array (default) or numpy matrix.
             
     Returns
     -------
-    C_N2B: direction consine matrix that rotates the vector from the first frame
-        to the second frame according to the specified rotation_sequence.
+    C_N2B : direction consine matrix that rotates the vector from the first frame
+            to the second frame according to the specified rotation_sequence.
         
     Examples
     --------
@@ -497,14 +509,16 @@ def dcm2quat(C,rotation_sequence='ZYX'):
     
     Parameters
     ----------
-    C: direction consine matrix that rotates the vector from the first frame
-    to the second frame according to the specified rotation_sequence.
-    rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
+    C : direction consine matrix that rotates the vector from the first frame
+        to the second frame according to the specified rotation_sequence.
+        rotation_sequence: {'ZYX'}, optional. Rotation sequences. Default is 'ZYX'.
     
-    Return
-    ------
-    q0: {(N,)} array like scalar componenet of the quaternion
-    qvec:{(N,3)} array like vector component of the quaternion
+    Returns
+    -------
+    q0 : {(N,)} array_like 
+        Scalar componenet of the quaternion
+    qvec : {(N,3)} array_like 
+        Vector component of the quaternion
 
     Examples
     --------
@@ -539,13 +553,15 @@ def qmult(p0,pvec,q0,qvec):
     
     Parameters
     ----------
-    p0, q0: {(N,)} array like scalar componenet of the quaternion
-    pvec, qvec:{(N,3)} array like vector component of the quaternion
+    p0, q0 : {(N,)} array_like 
+        Scalar componenet of the quaternion
+    pvec, qvec : {(N,3)} array_like
+        Vector component of the quaternion
     
-    Return
-    ------
-    r0: {(N,)} array like scalar componenet of the quaternion
-    rvec:{(N,3)} array like vector component of the quaternion
+    Returns
+    -------
+    r0 : {(N,)} array like scalar componenet of the quaternion
+    rvec : {(N,3)} array like vector component of the quaternion
     
     Examples
     --------
@@ -592,23 +608,25 @@ def qmult(p0,pvec,q0,qvec):
 def llarate(VN,VE,VD,lat,alt,lat_unit='deg',alt_unit='m'):
     """
     Calculate Latitude, Longitude, Altitude Rate given locally tangent velocity
+    
     Parameters
     ----------
-    VN: {(N,)} array like earth relative velocity in the North direction, m/s
-    VE: {(N,)} array like earth relative velocity in the East direction, m/s
-    VD: {(N,)} array like earth relative velocity in the Down direction, m/s
-    lat: {(N,)} array like latitudes, unit specified in lat_unit, default deg
-    alt: {(N,)} array like altitudes, unit specified in alt_unit, default m
+    VN : {(N,)} array like earth relative velocity in the North direction, m/s
+    VE : {(N,)} array like earth relative velocity in the East direction, m/s
+    VD : {(N,)} array like earth relative velocity in the Down direction, m/s
+    lat : {(N,)} array like latitudes, unit specified in lat_unit, default deg
+    alt : {(N,)} array like altitudes, unit specified in alt_unit, default m
     
-    Return
-    ------
-    lla_dot: {(N,3)} np.array of latitude rate, longitude rate, altitude rate.
-             The unit of latitude and longitude rate will be the same as the 
-             unit specified by lat_unit and the unit of altitude rate will be 
-             the same as alt_unit
-    Calls
-    -----
-    earthrad
+    Returns
+    -------
+    lla_dot : {(N,3)} np.array of latitude rate, longitude rate, altitude rate.
+              The unit of latitude and longitude rate will be the same as the 
+              unit specified by lat_unit and the unit of altitude rate will be 
+              the same as alt_unit
+    
+    See Also
+    --------
+    earthrad : called by this method
     
     Examples
     --------
@@ -668,18 +686,18 @@ def earthrate(lat, lat_unit = 'deg', model='wgs84'):
     
     Paul Groves's Notation: :math:`\omega_{IE}^N`, Eq. (2.75), Ch. 2.3, pp. 44
     
-    References
-    ----------
-    P. Groves, GNSS, Inertial, and Integrated Navigation Systems, Artech House, 2008
-    
     Parameters
     ----------
-    lat: {(N,)} array like latitudes, unit specified in lat_unit, default deg
+    lat : {(N,)} array like latitudes, unit specified in lat_unit, default deg
     
-    Return
-    ------
-    e: {(N,3)} np.array of the earth's rotation rate
-    The unit is in rad/seconds.
+    Returns
+    -------
+    e : {(N,3)} np.array of the earth's rotation rate
+        The unit is in rad/seconds.
+
+    References
+    ----------
+    [1] P. Groves, GNSS, Inertial, and Integrated Navigation Systems, Artech House, 2008
     """
     if(lat_unit=='deg'):
         lat = np.deg2rad(lat)
@@ -721,8 +739,8 @@ def navrate(VN, VE, VD,lat, alt, lat_unit='deg', alt_unit='m', model='wgs84'):
     lat: {(N,)} array like latitudes, unit specified in lat_unit, default deg
     alt: {(N,)} array like altitudes, unit specified in alt_unit, default m
     
-    Return
-    ------
+    Returns
+    -------
     rho: {(N,3)} np.array of the transport rate.
     The unit is in rad/seconds.
     
@@ -763,12 +781,12 @@ def earthrad(lat, lat_unit='deg', model='wgs84'):
 
     Parameters
     ----------
-    lat: {(N,)} array like latitude, unit specified by lat_unit, default in deg
+    lat : {(N,)} array like latitude, unit specified by lat_unit, default in deg
     
     Returns
     -------
-    R_N: {(N,)} array like, radius of curvature in the prime vertical (East-West)
-    R_M: {(N,)} array like, radius of curvature in the meridian (North-South)
+    R_N : {(N,)} array like, radius of curvature in the prime vertical (East-West)
+    R_M : {(N,)} array like, radius of curvature in the meridian (North-South)
     
     Examples
     --------
@@ -808,13 +826,13 @@ def lla2ecef(lat, lon, alt, latlon_unit='deg', alt_unit='m', model='wgs84'):
     
     Parameters
     ----------
-    lat: {(N,)} array like latitude, unit specified by latlon_unit, default in deg
-    lon: {(N,)} array like longitude, unit specified by latlon_unit, default in deg
-    alt: {(N,)} array like altitude, unit specified by alt_unit, default in m
+    lat : {(N,)} array like latitude, unit specified by latlon_unit, default in deg
+    lon : {(N,)} array like longitude, unit specified by latlon_unit, default in deg
+    alt : {(N,)} array like altitude, unit specified by alt_unit, default in m
     
     Returns
     -------
-    ecef: {(N,3)} array like ecef position, unit is the same as alt_unit
+    ecef : {(N,3)} array like ecef position, unit is the same as alt_unit
     """
     lat,N1 = _input_check_Nx1(lat)
     lon,N2 = _input_check_Nx1(lon)
@@ -848,19 +866,21 @@ def ecef2lla(ecef, latlon_unit='deg'):
     Calculate the Latitude, Longitude and Altitude of a point located on earth 
     given the ECEF Coordinates.
     
-    Reference: Jekeli, C.,"Inertial Navigation Systems With Geodetic
-    Applications", Walter de Gruyter, New York, 2001, pp. 24
+    References
+    ----------
+    .. [1] Jekeli, C.,"Inertial Navigation Systems With Geodetic
+       Applications", Walter de Gruyter, New York, 2001, pp. 24
     
     Parameters
     ----------
-    ecef = {(N,3)} array like input of ECEF coordinate in X, Y, and Z column, unit is meters
-    latlon_unit = {('deg','rad')} specifies the output latitude and longitude unit
+    ecef : {(N,3)} array like input of ECEF coordinate in X, Y, and Z column, unit is meters
+    latlon_unit : {('deg','rad')} specifies the output latitude and longitude unit
     
     Returns
     -------
-    lat = {(N,)} array like latitude in unit specified by latlon_unit
-    lon = {(N,)} array like longitude in unit specified by latlon_unit
-    alt = {(N,)} array like altitude in meters
+    lat : {(N,)} array like latitude in unit specified by latlon_unit
+    lon : {(N,)} array like longitude in unit specified by latlon_unit
+    alt : {(N,)} array like altitude in meters
     """
     ecef,N = _input_check_Nx3(ecef)
     if(N>1):
@@ -930,14 +950,14 @@ def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='
     
     Parameters
     ----------
-    ecef: {(N,3)} input vector expressed in the ECEF frame
-    lat_ref: Reference latitude, unit specified by latlon_unit, default in deg
-    lon_ref: Reference longitude, unit specified by latlon_unit, default in deg
-    alt: Reference altitude, unit specified by alt_unit, default in m
+    ecef : {(N,3)} input vector expressed in the ECEF frame
+    lat_ref : Reference latitude, unit specified by latlon_unit, default in deg
+    lon_ref : Reference longitude, unit specified by latlon_unit, default in deg
+    alt : Reference altitude, unit specified by alt_unit, default in m
     
     Returns
     -------
-    ned: {(N,3)} array like ecef position, unit is the same as alt_unit
+    ned : {(N,3)} array like ecef position, unit is the same as alt_unit
     
     Examples
     --------
@@ -989,13 +1009,14 @@ def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='
 def skew(w,output_type='ndarray'):
     """
     Make a skew symmetric 2-D array
+    
     Parameters
     ----------
-    w: {(3,)} array like vector
+    w : {(3,)} array_like
     
     Returns
     -------
-    C: {(3,3)} skew symmetric representation of w
+    C : {(3,3)} skew symmetric representation of w
     
     Examples
     --------
@@ -1003,8 +1024,8 @@ def skew(w,output_type='ndarray'):
     >>> from navpy import skew
     >>> w = [1, 2, 3]
     >>> skew(w)
-    array([[ 0., -3.,  2.],\
-           [ 3.,  0., -1.],\
+    array([[ 0., -3.,  2.],
+           [ 3.,  0., -1.],
            [-2.,  1.,  0.]])
     """
     w,N = _input_check_Nx1(np.array(w))

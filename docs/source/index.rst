@@ -13,13 +13,9 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-
-Auto Generate
-=============
-
-.. autofunction:: navpy.angle2dcm
-
-.. autofunction:: navpy.dcm2angle
+   
+   code_docs/index.rst
+   user_guide/index.rst
 
 Indices and tables
 ==================
