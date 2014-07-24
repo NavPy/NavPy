@@ -7,13 +7,15 @@ Welcome to NavPy's documentation!
 =================================
 
 This will be NavPy's documentation site.
-(under construction)
+(under construction).  Visit later!
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
-
+   
+   code_docs/index.rst
+   user_guide/index.rst
 
 Indices and tables
 ==================
