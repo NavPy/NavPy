@@ -1,6 +1,7 @@
 # NavPy
 
 NavPy is an open-source Python library for navigation and estimation applications.
+This is forked from https://github.com/NavPy/NavPy
 
 For more information, visit the [NavPy Documentation](http://navpy.readthedocs.org/en/latest/).
 
