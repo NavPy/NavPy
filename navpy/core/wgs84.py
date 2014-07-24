@@ -3,31 +3,35 @@ WGS 84 four defining parameters and several commonly used derived parameters.
 All parameters are stored with the exact number of significant digits provided
 by the WGS 84 rublished report.  Available parameters:
 
-          a: semi-major axis [m]
-          f: flattenning
-    omega_E: angular velocity of the Earth [rad/s]
-         GM: earth's gravitational constant [m^3/s^2]
-            (note: for GPS applications, use GM_GPS)
+Parameters
+----------
+
+a : semi-major axis [m]
+f : flattenning
+omega_E : angular velocity of the Earth [rad/s]
+GM : earth's gravitational constant [m^3/s^2]
+     (note: for GPS applications, use GM_GPS)
         
-         _b: semi-minor axis [m]
-       _ecc: first eccentricity
-  _ecc_sqrd: first eccentricity squared
+_b : semi-minor axis [m]
+_ecc : first eccentricity
+_ecc_sqrd : first eccentricity squared
 
 Copyright (c) 2014 NavPy Developers. All rights reserved.
 Use of this source code is governed by a BSD-style license that can be found in
 LICENSE.txt
 
-Reference
----------
-NIMA Technical Report TR8350.2, "Department of Defense World Geodetic
-System 1984, Its Definition and Relationships With Local Geodetic Systems"
+References
+----------
+.. [1] NIMA Technical Report TR8350.2, "Department of Defense World Geodetic
+       System 1984, Its Definition and Relationships With Local Geodetic Systems"
 
-http://earth-info.nga.mil/GandG/publications/tr8350.2/wgs84fin.pdf
-Accessed on Nov. 19, 2013 
+       http://earth-info.nga.mil/GandG/publications/tr8350.2/wgs84fin.pdf
+       Accessed on Nov. 19, 2013 
 
 Examples
 --------
-# Note, examples don't print full precision.
+Note, examples don't print full precision.
+
 >>> import wgs84
 >>> print(wgs84.a)
 6378137.0
