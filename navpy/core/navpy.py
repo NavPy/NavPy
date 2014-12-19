@@ -921,17 +921,17 @@ def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg', alt_uni
     
     Parameters
     ----------
-    lat: {(N,)} array like latitude, unit specified by latlon_unit, default in deg
-    lon: {(N,)} array like longitude, unit specified by latlon_unit, default in deg
-    alt: {(N,)} array like altitude, unit specified by alt_unit, default in m
+    lat : {(N,)} array like latitude, unit specified by latlon_unit, default in deg
+    lon : {(N,)} array like longitude, unit specified by latlon_unit, default in deg
+    alt : {(N,)} array like altitude, unit specified by alt_unit, default in m
     
-    lat_ref: Reference latitude, unit specified by latlon_unit, default in deg
-    lon_ref: Reference longitude, unit specified by latlon_unit, default in deg
-    alt: Reference altitude, unit specified by alt_unit, default in m
+    lat_ref : Reference latitude, unit specified by latlon_unit, default in deg
+    lon_ref : Reference longitude, unit specified by latlon_unit, default in deg
+    alt : Reference altitude, unit specified by alt_unit, default in m
     
     Returns
     -------
-    ned: {(N,3)} array like ecef position, unit is the same as alt_unit        
+    ned : {(N,3)} array like ecef position, unit is the same as alt_unit        
     """
     ecef  = lla2ecef(lat, lon, alt, latlon_unit=latlon_unit, 
                            alt_unit=alt_unit, model=model)
