@@ -21,7 +21,8 @@ ECEF and LLA
 .. autofunction:: navpy.lla2ecef
 .. autofunction:: navpy.lla2ned
 
-NED and ECEF
-------------
+NED and LLA
+-----------
 
-.. autofunction:: navpy.ned2ecef
+.. autofunction:: navpy.ned2lla
+.. autofunction:: navpy.lla2ned
