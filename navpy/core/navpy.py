@@ -921,17 +921,17 @@ def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg', alt_uni
     
     Parameters
     ----------
-    lat: {(N,)} array like latitude, unit specified by latlon_unit, default in deg
-    lon: {(N,)} array like longitude, unit specified by latlon_unit, default in deg
-    alt: {(N,)} array like altitude, unit specified by alt_unit, default in m
+    lat : {(N,)} array like latitude, unit specified by latlon_unit, default in deg
+    lon : {(N,)} array like longitude, unit specified by latlon_unit, default in deg
+    alt : {(N,)} array like altitude, unit specified by alt_unit, default in m
     
-    lat_ref: Reference latitude, unit specified by latlon_unit, default in deg
-    lon_ref: Reference longitude, unit specified by latlon_unit, default in deg
-    alt: Reference altitude, unit specified by alt_unit, default in m
+    lat_ref : Reference latitude, unit specified by latlon_unit, default in deg
+    lon_ref : Reference longitude, unit specified by latlon_unit, default in deg
+    alt : Reference altitude, unit specified by alt_unit, default in m
     
     Returns
     -------
-    ned: {(N,3)} array like ecef position, unit is the same as alt_unit        
+    ned : {(N,3)} array like ecef position, unit is the same as alt_unit        
     """
     ecef  = lla2ecef(lat, lon, alt, latlon_unit=latlon_unit, 
                            alt_unit=alt_unit, model=model)
@@ -941,6 +941,118 @@ def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg', alt_uni
     ned  = ecef2ned(ecef-ecef0, lat_ref, lon_ref, alt_ref, 
                           latlon_unit=latlon_unit, alt_unit=alt_unit, model=model)
     return ned
+
+def ned2lla(ned, lat_ref, lon_ref, alt_ref, latlon_unit='deg', alt_unit='m', model='wgs84'):
+    """
+    Calculate the Latitude, Longitude and Altitude of points given by NED coordinates
+    where NED origin given by lat_ref, lon_ref, and alt_ref.
+
+    Parameters
+    ----------
+    ned : {(N,3)} array like input of NED coordinate in N, E, and D column, unit is meters
+    lat_ref : Reference latitude, unit specified by latlon_unit, default in deg
+    lon_ref : Reference longitude, unit specified by latlon_unit, default in deg
+    alt_ref : Reference altitude, unit specified by alt_unit, default in m
+    latlon_unit : {('deg','rad')} specifies the output latitude and longitude unit
+    
+    Returns
+    -------
+    lat : {(N,)} array like latitude in unit specified by latlon_unit
+    lon : {(N,)} array like longitude in unit specified by latlon_unit
+    alt : {(N,)} array like altitude in meters
+
+    Note
+    ----
+    This method is a wrapper on ned2ecef (add ecef of NED-origin) and ecef2lla.
+    """
+
+    ecef = ned2ecef(ned,lat_ref,lon_ref,alt_ref,latlon_unit=latlon_unit,
+                                                alt_unit=alt_unit,
+                                                model=model)
+    # Add vector to ecef representation of NED-origin
+    ecef_ref = lla2ecef(lat_ref, lon_ref, alt_ref, latlon_unit=latlon_unit,
+                                                   alt_unit=alt_unit,
+                                                   model=model)
+    ecef += ecef_ref
+
+    lla = ecef2lla(ecef, latlon_unit=latlon_unit)
+
+    return lla
+
+
+def ned2ecef(ned,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='wgs84'):
+    """
+    Transform a vector resolved in NED (origin given by lat_ref, lon_ref, and alt_ref)
+    coordinates to its ECEF representation. 
+
+    Parameters
+    ----------
+    ned : {(N,3)} input array, units of meters
+    lat_ref : Reference latitude, unit specified by latlon_unit, default in deg
+    lon_ref : Reference longitude, unit specified by latlon_unit, default in deg
+    alt_ref : Reference altitude, unit specified by alt_unit, default in m
+    
+    Returns
+    -------
+    ecef : {(N,3)} array like ned vector, in the ECEF frame, units of meters
+
+    Notes
+    -----
+    The NED vector is treated as a relative vector, and hence the ECEF representation
+    returned is NOT converted into an absolute coordinate.  This means that the 
+    magnitude of `ned` and `ecef` will be the same (bar numerical differences).
+    
+    Examples
+    --------
+    >>> import navpy
+    >>> ned = [0, 0, 1]
+    >>> lat_ref, lon_ref, alt_ref = 45.0, -93.0, 250.0 # deg, meters
+    >>> ecef = navpy.ned2ecef(ned, lat_ref, lon_ref, alt_ref)
+    >>> print("NED:", ned)
+    >>> print("ECEF:", ecef)
+    >>> print("Notice that 'down' is not same as 'ecef-z' coordinate.")
+    """
+    lat_ref,N1 = _input_check_Nx1(lat_ref)
+    lon_ref,N2 = _input_check_Nx1(lon_ref)
+    alt_ref,N3 = _input_check_Nx1(alt_ref)
+    
+    if( (N1!=1) or (N2!=1) or (N3!=1) ):
+        raise ValueError('Reference Location can only be 1')
+    
+    ned,N = _input_check_Nx3(ned)
+
+    ned = ned.T
+    
+    C = np.zeros((3,3))
+
+    if(latlon_unit=='deg'):
+        lat_ref = np.deg2rad(lat_ref)
+        lon_ref = np.deg2rad(lon_ref)
+    elif(latlon_unit=='rad'):
+        pass
+    else:
+        raise ValueError('Input unit unknown')
+
+    C[0,0]=-np.sin(lat_ref)*np.cos(lon_ref)
+    C[0,1]=-np.sin(lat_ref)*np.sin(lon_ref)
+    C[0,2]= np.cos(lat_ref)
+    
+    C[1,0]=-np.sin(lon_ref)
+    C[1,1]= np.cos(lon_ref)
+    C[1,2]= 0
+
+    C[2,0]=-np.cos(lat_ref)*np.cos(lon_ref)
+    C[2,1]=-np.cos(lat_ref)*np.sin(lon_ref)
+    C[2,2]=-np.sin(lat_ref)
+
+    # C defines transoformation: ned = C * ecef.  Hence used transpose.
+    ecef = np.dot(C.T,ned)
+    ecef = ecef.T
+
+    if(N == 1):
+        ecef = ecef.reshape(3)
+
+    return ecef
 
 def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='wgs84'):
     """

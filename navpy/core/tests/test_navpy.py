@@ -44,7 +44,32 @@ class TestNavClass(unittest.TestCase):
         
         for e1, e2 in zip(ned_computed, ned):
             self.assertAlmostEqual(e1, e2, places=3)        
+ 
+    def test_ned2lla(self):
+        """
+        Test conversion from NED to LLA.
         
+        Data Source: derived from "test_lla2ned" above.
+        """
+        # A point near Los Angeles, CA
+        lat_ref = +( 34. +  0./60 + 0.00174/3600) # North
+        lon_ref = -(117. + 20./60 + 0.84965/3600) # West
+        alt_ref = 251.702 # [meters]  
+        
+        # Point near by with known NED position
+        lat = +(34.  + 0./60 + 0.19237/3600) # North
+        lon = -(117. +20./60 + 0.77188/3600) # West
+        alt =  234.052 # [meters]
+        
+        ned = [5.8738, 1.9959, 17.6498]
+
+        # Do conversion and check result
+        # Note: default assumption on units is deg and meters
+        lla_computed = navpy.ned2lla(ned, lat_ref, lon_ref, alt_ref)
+        
+        for e1, e2 in zip(lla_computed, [lat, lon, alt]):
+            self.assertAlmostEqual(e1, e2, places=3)        
+
 
     def test_ecef2ned(self):
         """
@@ -68,6 +93,28 @@ class TestNavClass(unittest.TestCase):
         ned_computed = navpy.ecef2ned(ecef, lat, lon, alt) 
         
         for e1, e2 in zip(ned_computed, ned):
+            self.assertAlmostEqual(e1, e2, places=3)
+
+    def test_ned2ecef(self):
+        """
+        Test conversion from NED to ECEF.
+        
+        Data Source: derived from "test_ecef2ned" above.
+        """
+        # A point near Los Angeles, CA, given from equation 2.12 [degrees]
+        lat = +( 34. +  0./60 + 0.00174/3600) # North
+        lon = -(117. + 20./60 + 0.84965/3600) # West
+        alt = 251.702 # [meters]
+
+        # Define example ECEF vector and associated NED, given in Example 2.4
+        ecef = np.array([0.3808, 0.7364, -0.5592])
+        ned  = np.array([0, 0, 1]) # local unit gravity
+        
+        # Do conversion and check result
+        # Note: default assumption on units is deg and meters
+        ecef_computed = navpy.ned2ecef(ned, lat, lon, alt) 
+        
+        for e1, e2 in zip(ecef_computed, ecef):
             self.assertAlmostEqual(e1, e2, places=3)
 
     def test_lla2ecef_Ausralia(self):
