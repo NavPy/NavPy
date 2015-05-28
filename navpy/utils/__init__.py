@@ -1,3 +1,3 @@
-from utils import *
+from .utils import *
 
 del utils

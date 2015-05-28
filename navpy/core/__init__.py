@@ -1,4 +1,4 @@
-from navpy import *
+from .navpy import *
 
 del navpy
 del np
