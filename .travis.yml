@@ -29,7 +29,7 @@ install:
 script:
   # run coverage on py3.4, regular on others
   - if [[ $PYTHON == python=3.4* ]]; then
-      nosetests --exe -v --with-doctest --with-cov --cover-package navpy;
+      nosetests --exe -v  --with-cov --cover-package navpy;
     else
       nosetests --exe -v navpy;
     fi
