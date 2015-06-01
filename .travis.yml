@@ -1,0 +1,38 @@
+# travis-ci.org definition for metatlas build
+
+# After changing this file, check it on:
+#   http://lint.travis-ci.org/
+
+# http://conda.pydata.org/docs/travis.html
+language: python
+
+env:
+    - PYTHON="python=2.7"
+    - PYTHON="python=3.4"
+
+before_install:
+  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes
+  - conda update conda
+  - conda info -a
+  - travis_retry conda create -n test $PYTHON pip nose numpy
+  - source activate test
+  - travis_retry pip install coveralls
+
+install:
+  - export PYTHONWARNINGS=all
+  - pip install -e .
+
+script:
+  # run coverage on py3.4, regular on others
+  - if [[ $PYTHON == python=3.4* ]]; then
+      nosetests --exe -v  --with-cov --cover-package navpy;
+    else
+      nosetests --exe -v navpy;
+    fi
+
+after_success:
+    - coveralls
