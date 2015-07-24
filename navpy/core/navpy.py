@@ -9,17 +9,19 @@ from . import wgs84
 from ..utils import input_check_Nx3 as _input_check_Nx3
 from ..utils import input_check_Nx1 as _input_check_Nx1
 
-def angle2dcm(rotAngle1,rotAngle2,rotAngle3,input_unit='rad',rotation_sequence='ZYX',output_type='ndrarray'):
+
+def angle2dcm(rotAngle1, rotAngle2, rotAngle3, input_unit='rad',
+              rotation_sequence='ZYX', output_type='ndrarray'):
     """
     This function converts Euler Angle into Direction Cosine Matrix (DCM).
-    The DCM is described by three sucessive rotation rotAngle1, rotAngle2, and 
+    The DCM is described by three sucessive rotation rotAngle1, rotAngle2, and
     rotAngle3 about the axis described by the rotation_sequence.
-    
+
     The default rotation_sequence='ZYX' is the aerospace sequence and rotAngle1
     is the yaw angle, rotAngle2 is the pitch angle, and rotAngle3 is the roll
-    angle. In this case DCM transforms a vector from the locally level 
+    angle. In this case DCM transforms a vector from the locally level
     coordinate frame (i.e. the NED frame) to the body frame.
-    
+
     Parameters
     ----------
     rotAngle1, rotAngle2, rotAngle3 :  angles
@@ -31,57 +33,67 @@ def angle2dcm(rotAngle1,rotAngle2,rotAngle3,input_unit='rad',rotation_sequence='
             Rotation sequences. Default is 'ZYX'.
     output_type : {'ndarray','matrix'}, optional
             Output type. Default is 'ndarray'.
-    
+
     Returns
     --------
     C : {3x3} Direction Cosine Matrix
-    
+
     Notes
     -----
     Programmer:    Adhika Lie
     Created:    	 May 03, 2011
     Last Modified: March 06, 2013
     """
-    R3 = np.zeros((3,3))
-    R2 = np.zeros((3,3))
-    R1 = np.zeros((3,3))
-    
-    if(input_unit=='deg'):
+    R3 = np.zeros((3, 3))
+    R2 = np.zeros((3, 3))
+    R1 = np.zeros((3, 3))
+
+    if(input_unit == 'deg'):
         rotAngle1 = np.deg2rad(rotAngle1)
         rotAngle2 = np.deg2rad(rotAngle2)
         rotAngle3 = np.deg2rad(rotAngle3)
-    
-    R3[2,2] = 1.0;
-    R3[0,0] = np.cos(rotAngle1); R3[0,1] = np.sin(rotAngle1)
-    R3[1,0] =-np.sin(rotAngle1); R3[1,1] = np.cos(rotAngle1)
-    
-    R2[1,1] = 1.0
-    R2[0,0] = np.cos(rotAngle2); R2[0,2] =-np.sin(rotAngle2)
-    R2[2,0] = np.sin(rotAngle2); R2[2,2] = np.cos(rotAngle2)
-    
-    R1[0,0] = 1.0
-    R1[1,1] = np.cos(rotAngle3); R1[1,2] = np.sin(rotAngle3)
-    R1[2,1] =-np.sin(rotAngle3); R1[2,2] = np.cos(rotAngle3)
-    
-    C = R1.dot(R2.dot(R3))
-    
-    if(output_type=='matrix'):
+
+    R3[2, 2] = 1.0
+    R3[0, 0] = np.cos(rotAngle1)
+    R3[0, 1] = np.sin(rotAngle1)
+    R3[1, 0] = -np.sin(rotAngle1)
+    R3[1, 1] = np.cos(rotAngle1)
+
+    R2[1, 1] = 1.0
+    R2[0, 0] = np.cos(rotAngle2)
+    R2[0, 2] = -np.sin(rotAngle2)
+    R2[2, 0] = np.sin(rotAngle2)
+    R2[2, 2] = np.cos(rotAngle2)
+
+    R1[0, 0] = 1.0
+    R1[1, 1] = np.cos(rotAngle3)
+    R1[1, 2] = np.sin(rotAngle3)
+    R1[2, 1] = -np.sin(rotAngle3)
+    R1[2, 2] = np.cos(rotAngle3)
+
+    if rotation_sequence == 'ZYX':
+        C = R1.dot(R2.dot(R3))
+    else:
+        raise NotImplementedError('Rotation sequences other than ZYX are not currently implemented')
+
+    if(output_type == 'matrix'):
         C = np.matrix(C)
-    
+
     return C
 
-def dcm2angle(C,output_unit='rad',rotation_sequence='ZYX'):
+
+def dcm2angle(C, output_unit='rad', rotation_sequence='ZYX'):
     """
     This function converts a Direction Cosine Matrix (DCM) into the three
     rotation angles.
     The DCM is described by three sucessive rotation rotAngle1, rotAngle2, and
     rotAngle3 about the axis described by the rotation_sequence.
-    
+
     The default rotation_sequence='ZYX' is the aerospace sequence and rotAngle1
     is the yaw angle, rotAngle2 is the pitch angle, and rotAngle3 is the roll
     angle. In this case DCM transforms a vector from the locally level
     coordinate frame (i.e. the NED frame) to the body frame.
-    
+
     Parameters
     ----------
     C : direction consine matrix that rotates the vector from the first frame
@@ -90,42 +102,47 @@ def dcm2angle(C,output_unit='rad',rotation_sequence='ZYX'):
             Rotation angles. Default is 'rad'.
     rotation_sequence : {'ZYX'}, optional
             Rotation sequences. Default is 'ZYX'.
-    
+
     Returns
     -------
     rotAngle1, rotAngle2, rotAngle3 :  angles
             They are a sequence of angles about successive axes described by
             rotation_sequence.
-            
+
     Notes
     -----
     The returned rotAngle1 and 3 will be between   +/- 180 deg (+/- pi rad).
     In contrast, rotAngle2 will be in the interval +/- 90 deg (+/- pi/2 rad).
-    
+
     In the 'ZYX' or '321' aerospace sequence, that means the pitch angle
     returned will always be inside the closed interval +/- 90 deg (+/- pi/2 rad).
     Applications where pitch angles near or larger than 90 degrees in magnitude
     are expected should used alternate attitude parameterizations like
     quaternions.
     """
-    if(C.shape[0]!=C.shape[1]):
+    if(C.shape[0] != C.shape[1]):
         raise ValueError('Matrix is not square')
-    if(C.shape[0]!=3):
+    if(C.shape[0] != 3):
         raise ValueError('Matrix is not 3x3')
 
-    if(rotation_sequence=='ZYX'):
-        rotAngle1 = np.arctan2(C[0,1],C[0,0])  # Yaw
-        rotAngle2 = -np.arcsin(C[0,2]) # Pitch
-        rotAngle3 = np.arctan2(C[1,2],C[2,2]) # Roll
+    if(rotation_sequence == 'ZYX'):
+        rotAngle1 = np.arctan2(C[0, 1], C[0, 0])   # Yaw
+        rotAngle2 = -np.arcsin(C[0, 2])  # Pitch
+        rotAngle3 = np.arctan2(C[1, 2], C[2, 2])  # Roll
 
-    if(output_unit=='deg'):
+    else:
+        raise NotImplementedError('Rotation sequences other than ZYX are not currently implemented')
+
+    if(output_unit == 'deg'):
         rotAngle1 = np.rad2deg(rotAngle1)
         rotAngle2 = np.rad2deg(rotAngle2)
         rotAngle3 = np.rad2deg(rotAngle3)
 
     return rotAngle1, rotAngle2, rotAngle3
 
-def omega2rates(pitch, roll, input_unit='rad', euler_angles_order='roll_pitch_yaw', output_type='ndarray'):
+
+def omega2rates(pitch, roll, input_unit='rad',
+                euler_angles_order='roll_pitch_yaw', output_type='ndarray'):
     """
     This function is used to create the transformation matrix to go from:
 	    [p, q, r] --> [roll_rate, pitch_rate, yaw_rate]
@@ -143,36 +160,39 @@ def omega2rates(pitch, roll, input_unit='rad', euler_angles_order='roll_pitch_ya
     euler_angles_order : {'roll_pitch_yaw', 'yaw_pitch_roll'}, optional
         Assumed order of Euler Angles attitude state vector (see ``Notes``).
     output_type : {'ndarray' or 'matrix'}, optional
-        Numpy array (default) or matrix 
-    
+        Numpy array (default) or matrix
+
     Returns
     -------
     R : transformation matrix, from xyz body-rate to Euler angle-rates
-        numpy 'output_type' 3x3 (Note: default return variable is an ARRAY, not a matrix)
-        
+        numpy 'output_type' 3x3 (Note: default return variable is an ARRAY,
+        not a matrix)
+
     Notes
     -----
     Since the returned transformation matrix is used to transform one vector
-    to another, the assumed attitude variables order matters.  
-    The ``euler_angles_order`` parameter can be used to specify the assumed order.
+    to another, the assumed attitude variables order matters.
+    The ``euler_angles_order`` parameter can be used to specify the assumed
+    order.
 
     The difference is demonstrated by example:
 
         By default euler_angles_order='roll_pitch_yaw'
-        R = omega2rates(pitch, roll) 
+        R = omega2rates(pitch, roll)
         [ roll_rate]         [omega_x]
         [pitch_rate] = dot(R,[omega_y])
         [  yaw_rate]         [omega_z]
 
         Now assume our attitude state is [yaw, pitch, roll].T
-        R = omega2rates(pitch, roll, euler_angles_order='yaw_pitch_roll') 
+        R = omega2rates(pitch, roll, euler_angles_order='yaw_pitch_roll')
         [ yaw_rate]          [omega_x]
         [pitch_rate] = dot(R,[omega_y])
-        [ roll_rate]         [omega_z]	
+        [ roll_rate]         [omega_z]
 
     References
     ----------
-    [1] Equation 2.74, Aided Navigation: GPS with High Rate Sensors, Jay A. Farrel 2008
+    [1] Equation 2.74, Aided Navigation: GPS with High Rate Sensors,
+        Jay A. Farrel 2008
 
     [2] omega2rates.m function at:
     http://www.gnssapplications.org/downloads/chapter7/Chapter7_GNSS_INS_Functions.tar.gz
