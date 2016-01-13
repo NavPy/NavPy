@@ -54,6 +54,32 @@ def input_check_Nx3(x):
     return x, N
 
 
+def input_check_Nx3x3(x):
+    """
+    Check x to be of dimension Nx3x3
+
+    Adhika Lie
+    """
+    theSize = _np.shape(x)
+    N = 1
+
+    if(len(theSize) > 2):
+        # 1. Input must be of size N x 3
+        if (3, 3) not in (theSize[:2], theSize[-2:]):
+            raise ValueError('Not a N x 3 x 3 array')
+        # 2. Make it into a Nx3x3 array
+        if (theSize[1:] != (3, 3)):
+            x = _np.rollaxis(x, -1)
+        N = x.shape[0]
+        # 3. If N == 2, make it into a 2-D array
+        if (x.shape[0] == 1):
+            x = x[0]
+    elif(theSize != (3, 3)):
+        raise ValueError('Not a 3 x 3 array')
+
+    return x, N
+
+
 def loadtxt2dic(filename):
     """
     Loads text file of key:value pairs into a dictionary.

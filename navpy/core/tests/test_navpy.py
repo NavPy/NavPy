@@ -441,22 +441,33 @@ class TestNavClass(unittest.TestCase):
              Chapter 7 library function: eul2Cbn.m (transpose of this used)
         """
         
-        # Define Euler angles
-        yaw, pitch, roll = np.deg2rad([-83, 2.3, 13])
+        # Define Euler angles and expected DCMs
+        checks = (
+            (np.deg2rad([-83, 2.3, 13]),
+             np.matrix([[ 0.121771, -0.991747, -0.040132],
+                        [ 0.968207,  0.109785,  0.224770],
+                        [-0.218509, -0.066226,  0.973585]])),
+        ) * 2
 
-        Rnav2body_expected = np.matrix([[ 0.121771, -0.991747, -0.040132],
-                                        [ 0.968207,  0.109785,  0.224770],
-                                        [-0.218509, -0.066226,  0.973585]])
+        for angles, Rnav2body_expected in checks:
+            yaw, pitch, roll = angles
 
-        Rnav2body_computed = navpy.angle2dcm(yaw, pitch, roll)
+            Rnav2body_computed = navpy.angle2dcm(yaw, pitch, roll)
+            
+            np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
+            
+            # Test units feature
+            yaw_deg, pitch_deg, roll_deg = np.rad2deg([yaw, pitch, roll])
+            Rnav2body_computed = navpy.angle2dcm(yaw_deg, pitch_deg, roll_deg, input_unit='deg')
+            np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
+
+        # Test with multiple inputs
+        angles = np.column_stack([a for a, m in checks])
+        Rnav2body = navpy.angle2dcm(*angles)
+        for Rnav2body_expected, Rnav2body_computed in zip(
+                [m for a, m in checks], Rnav2body):
+            np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
         
-        np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
-        
-        # Test units feature
-        yaw_deg, pitch_deg, roll_deg = np.rad2deg([yaw, pitch, roll])
-        Rnav2body_computed = navpy.angle2dcm(yaw_deg, pitch_deg, roll_deg, input_unit='deg')
-        np.testing.assert_almost_equal(Rnav2body_expected, Rnav2body_computed, decimal=6)
-    
     def test_dcm2angle(self):
         """
         Test deriving Euler angles from body -> nav transformation matrix
@@ -469,14 +480,18 @@ class TestNavClass(unittest.TestCase):
         yaw, pitch, roll = [-83, 2.3, 13] # degrees
         
         Rnav2body = np.array([[ 0.121771, -0.991747, -0.040132],
-                               [ 0.968207,  0.109785,  0.224770],
-                               [-0.218509, -0.066226,  0.973585]])
-    
-        yaw_C, pitch_C, roll_C = navpy.dcm2angle(Rnav2body, output_unit='deg')
+                              [ 0.968207,  0.109785,  0.224770],
+                              [-0.218509, -0.066226,  0.973585]])
+
+        # Make sure matrix type is handled correctly
+        for nptype in np.array, np.matrix:
+            yaw_C, pitch_C, roll_C = navpy.dcm2angle(nptype(Rnav2body), output_unit='deg')
                                
-        # Match won't be perfect because Rnav2body is rounded.
-        np.testing.assert_almost_equal([yaw_C, pitch_C, roll_C], [yaw, pitch, roll], decimal=4)
-    
+            # Match won't be perfect because Rnav2body is rounded.
+            np.testing.assert_almost_equal([yaw_C, pitch_C, roll_C], [yaw, pitch, roll], decimal=4)
+
+        # Check output with multiple inputs
+        out = navpy.dcm2angle(np.rollaxis(np.repeat(Rnav2body, 2).reshape(3, 3, -1), -1))
         
     def test_skew_array(self):
         """

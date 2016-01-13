@@ -7,11 +7,12 @@ LICENSE.txt
 import numpy as np
 from . import wgs84
 from ..utils import input_check_Nx3 as _input_check_Nx3
+from ..utils import input_check_Nx3x3 as _input_check_Nx3x3
 from ..utils import input_check_Nx1 as _input_check_Nx1
 
 
 def angle2dcm(rotAngle1, rotAngle2, rotAngle3, input_unit='rad',
-              rotation_sequence='ZYX', output_type='ndrarray'):
+              rotation_sequence='ZYX', output_type='ndarray'):
     """
     This function converts Euler Angle into Direction Cosine Matrix (DCM).
     The DCM is described by three sucessive rotation rotAngle1, rotAngle2, and
@@ -21,6 +22,9 @@ def angle2dcm(rotAngle1, rotAngle2, rotAngle3, input_unit='rad',
     is the yaw angle, rotAngle2 is the pitch angle, and rotAngle3 is the roll
     angle. In this case DCM transforms a vector from the locally level
     coordinate frame (i.e. the NED frame) to the body frame.
+
+    This function can batch process a series of rotations (e.g., time series
+    of Euler angles).
 
     Parameters
     ----------
@@ -42,40 +46,52 @@ def angle2dcm(rotAngle1, rotAngle2, rotAngle3, input_unit='rad',
     -----
     Programmer:    Adhika Lie
     Created:    	 May 03, 2011
-    Last Modified: March 06, 2013
+    Last Modified: January 12, 2016
     """
-    R3 = np.zeros((3, 3))
-    R2 = np.zeros((3, 3))
-    R1 = np.zeros((3, 3))
+    rotAngle1, N1 = _input_check_Nx1(rotAngle1)
+    rotAngle2, N2 = _input_check_Nx1(rotAngle2)
+    rotAngle3, N3 = _input_check_Nx1(rotAngle3)
+
+    if(N1 != N2 or N1 != N3):
+        raise ValueError('Inputs are not of same dimensions')
+    if(N1 > 1 and output_type != 'ndarray'):
+        raise ValueError('Matrix output requires scalar inputs')
+
+    R3 = np.zeros((N1, 3, 3))
+    R2 = np.zeros((N1, 3, 3))
+    R1 = np.zeros((N1, 3, 3))
 
     if(input_unit == 'deg'):
         rotAngle1 = np.deg2rad(rotAngle1)
         rotAngle2 = np.deg2rad(rotAngle2)
         rotAngle3 = np.deg2rad(rotAngle3)
 
-    R3[2, 2] = 1.0
-    R3[0, 0] = np.cos(rotAngle1)
-    R3[0, 1] = np.sin(rotAngle1)
-    R3[1, 0] = -np.sin(rotAngle1)
-    R3[1, 1] = np.cos(rotAngle1)
+    R3[:, 2, 2] = 1.0
+    R3[:, 0, 0] = np.cos(rotAngle1)
+    R3[:, 0, 1] = np.sin(rotAngle1)
+    R3[:, 1, 0] = -np.sin(rotAngle1)
+    R3[:, 1, 1] = np.cos(rotAngle1)
 
-    R2[1, 1] = 1.0
-    R2[0, 0] = np.cos(rotAngle2)
-    R2[0, 2] = -np.sin(rotAngle2)
-    R2[2, 0] = np.sin(rotAngle2)
-    R2[2, 2] = np.cos(rotAngle2)
+    R2[:, 1, 1] = 1.0
+    R2[:, 0, 0] = np.cos(rotAngle2)
+    R2[:, 0, 2] = -np.sin(rotAngle2)
+    R2[:, 2, 0] = np.sin(rotAngle2)
+    R2[:, 2, 2] = np.cos(rotAngle2)
 
-    R1[0, 0] = 1.0
-    R1[1, 1] = np.cos(rotAngle3)
-    R1[1, 2] = np.sin(rotAngle3)
-    R1[2, 1] = -np.sin(rotAngle3)
-    R1[2, 2] = np.cos(rotAngle3)
+    R1[:, 0, 0] = 1.0
+    R1[:, 1, 1] = np.cos(rotAngle3)
+    R1[:, 1, 2] = np.sin(rotAngle3)
+    R1[:, 2, 1] = -np.sin(rotAngle3)
+    R1[:, 2, 2] = np.cos(rotAngle3)
 
     if rotation_sequence == 'ZYX':
-        C = R1.dot(R2.dot(R3))
+        C = np.einsum('nij, njk -> nik', R1,
+                      np.einsum('nij, njk -> nik', R2, R3))
     else:
         raise NotImplementedError('Rotation sequences other than ZYX are not currently implemented')
 
+    if(N1 == 1):
+        C = C[0]
     if(output_type == 'matrix'):
         C = np.matrix(C)
 
@@ -93,6 +109,9 @@ def dcm2angle(C, output_unit='rad', rotation_sequence='ZYX'):
     is the yaw angle, rotAngle2 is the pitch angle, and rotAngle3 is the roll
     angle. In this case DCM transforms a vector from the locally level
     coordinate frame (i.e. the NED frame) to the body frame.
+
+    This function can batch process a series of rotations (e.g., time series
+    of direction cosine matrices).
 
     Parameters
     ----------
@@ -120,15 +139,12 @@ def dcm2angle(C, output_unit='rad', rotation_sequence='ZYX'):
     are expected should used alternate attitude parameterizations like
     quaternions.
     """
-    if(C.shape[0] != C.shape[1]):
-        raise ValueError('Matrix is not square')
-    if(C.shape[0] != 3):
-        raise ValueError('Matrix is not 3x3')
+    C, N = _input_check_Nx3x3(C)
 
     if(rotation_sequence == 'ZYX'):
-        rotAngle1 = np.arctan2(C[0, 1], C[0, 0])   # Yaw
-        rotAngle2 = -np.arcsin(C[0, 2])  # Pitch
-        rotAngle3 = np.arctan2(C[1, 2], C[2, 2])  # Roll
+        rotAngle1 = np.arctan2(C[..., 0, 1], C[..., 0, 0])   # Yaw
+        rotAngle2 = -np.arcsin(C[..., 0, 2])  # Pitch
+        rotAngle3 = np.arctan2(C[..., 1, 2], C[..., 2, 2])  # Roll
 
     else:
         raise NotImplementedError('Rotation sequences other than ZYX are not currently implemented')
