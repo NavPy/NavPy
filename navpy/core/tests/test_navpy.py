@@ -497,7 +497,10 @@ class TestNavClass(unittest.TestCase):
             np.testing.assert_almost_equal([yaw_C, pitch_C, roll_C], [yaw, pitch, roll], decimal=4)
 
         # Check output with multiple inputs
-        out = navpy.dcm2angle(np.rollaxis(np.repeat(Rnav2body, 2).reshape(3, 3, -1), -1))
+        out = navpy.dcm2angle(np.rollaxis(
+            np.repeat(Rnav2body, 5).reshape(3, 3, -1), -1), output_unit='deg')
+        np.testing.assert_almost_equal(
+            out, np.repeat([yaw, pitch, roll], out[0].size).reshape(3, -1), decimal=4)
         
     def test_skew_array(self):
         """
