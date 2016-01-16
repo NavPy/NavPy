@@ -28,7 +28,7 @@ def angle2dcm(rotAngle1, rotAngle2, rotAngle3, input_unit='rad',
 
     Parameters
     ----------
-    rotAngle1, rotAngle2, rotAngle3 :  angles
+    rotAngle1, rotAngle2, rotAngle3 : angles {(N,), (N,1), or (1,N)}
             They are a sequence of angles about successive axes described by
             rotation_sequence.
     input_unit : {'rad', 'deg'}, optional
@@ -114,7 +114,8 @@ def dcm2angle(C, output_unit='rad', rotation_sequence='ZYX'):
 
     Parameters
     ----------
-    C : direction consine matrix that rotates the vector from the first frame
+    C : {(3,3), (N,3,3), or (3,3,N)}
+        direction consine matrix that rotates the vector from the first frame
         to the second frame according to the specified rotation_sequence.
     output_unit : {'rad', 'deg'}, optional
             Rotation angles. Default is 'rad'.
