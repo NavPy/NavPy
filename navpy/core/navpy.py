@@ -85,6 +85,8 @@ def angle2dcm(rotAngle1, rotAngle2, rotAngle3, input_unit='rad',
     R1[:, 2, 2] = np.cos(rotAngle3)
 
     if rotation_sequence == 'ZYX':
+        # Equivalent to C = R1.dot(R2.dot(R3)) for each of N inputs but
+        # implemented efficiently in C extension
         C = np.einsum('nij, njk, nkm -> nim', R1, R2, R3)
     else:
         raise NotImplementedError('Rotation sequences other than ZYX are not currently implemented')

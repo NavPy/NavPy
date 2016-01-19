@@ -58,7 +58,7 @@ def input_check_Nx3x3(x):
     """
     Check x to be of dimension Nx3x3
 
-    Adhika Lie
+    Jacob Niehus
     """
     theSize = _np.shape(x)
     N = 1
