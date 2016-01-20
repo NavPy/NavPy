@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/NavPy/NavPy.svg?branch=master)](https://travis-ci.org/NavPy/NavPy)
+
 # NavPy
 
 NavPy is an open-source Python library for navigation and estimation applications.
