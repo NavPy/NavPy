@@ -286,7 +286,7 @@ def angle2quat(rotAngle1,rotAngle2,rotAngle3,
     
     Notes
     -----
-    Convert rotation angles to unit quaternion that transfroms a vector in F1 to
+    Convert rotation angles to unit quaternion that transforms a vector in F1 to
     F2 according to
     
     :math:`v_q^{F2} = q^{-1} \otimes v_q^{F1} \otimes q`
@@ -391,7 +391,7 @@ def quat2angle(q0,qvec,output_unit='rad',rotation_sequence='ZYX'):
     
     Notes
     -----
-    Convert rotation angles to unit quaternion that transfroms a vector in F1 to
+    Convert rotation angles to unit quaternion that transforms a vector in F1 to
     F2 according to
     
     :math:`v_q^{F2} = q^{-1} \otimes v_q^{F1} \otimes q`
