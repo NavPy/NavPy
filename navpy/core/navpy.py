@@ -16,7 +16,7 @@ def angle2dcm(rotAngle1, rotAngle2, rotAngle3, input_unit='rad',
     """
     This function converts Euler Angle into Direction Cosine Matrix (DCM).
     The DCM is described by three sucessive rotation rotAngle1, rotAngle2, and
-    rotAngle3 about the axis described by the rotation_sequence.
+    rotAngle3 about the axes described by the rotation_sequence.
 
     The default rotation_sequence='ZYX' is the aerospace sequence and rotAngle1
     is the yaw angle, rotAngle2 is the pitch angle, and rotAngle3 is the roll
@@ -110,7 +110,7 @@ def dcm2angle(C, output_unit='rad', rotation_sequence='ZYX'):
     This function converts a Direction Cosine Matrix (DCM) into the three
     rotation angles.
     The DCM is described by three sucessive rotation rotAngle1, rotAngle2, and
-    rotAngle3 about the axis described by the rotation_sequence.
+    rotAngle3 about the axes described by the rotation_sequence.
 
     The default rotation_sequence='ZYX' is the aerospace sequence and rotAngle1
     is the yaw angle, rotAngle2 is the pitch angle, and rotAngle3 is the roll
@@ -725,7 +725,7 @@ def llarate(VN,VE,VD,lat,alt,lat_unit='deg',alt_unit='m'):
 
 def earthrate(lat, lat_unit = 'deg', model='wgs84'):
     """
-    Calculate the earth rotation rate resolved on NED axis 
+    Calculate the earth rotation rate resolved on NED axes 
     given VN, VE, VD, lat, and alt.
     
     Paul Groves's Notation: :math:`\omega_{IE}^N`, Eq. (2.75), Ch. 2.3, pp. 44
