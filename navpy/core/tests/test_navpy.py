@@ -117,6 +117,25 @@ class TestNavClass(unittest.TestCase):
         
         for e1, e2 in zip(ecef_computed, ecef):
             self.assertAlmostEqual(e1, e2, places=3)
+            
+    
+    def test_ecef2lla_equator(self):
+        """
+        Test conversion of ECEF to LLA from the equator
+        
+        LLA = [0, 0 ,0], ECEF = [6378137. , 0., 0.]
+        """
+        lat = 0.; lon = 0.; alt = 0.;
+        ecef = np.array([6378137. , 0., 0.])
+        
+        lla_computed = navpy.ecef2lla(ecef)
+        
+        # Testing for higher precision for lat, lon
+        for e1, e2 in zip(lla_computed, [lat, lon]):
+            self.assertAlmostEqual(e1, e2, places=8)
+
+        # Two digits of precision for alt (i.e. cm)
+        self.assertAlmostEqual(lla_computed[2], alt, places=2)
 
     def test_lla2ecef_Ausralia(self):
         """
