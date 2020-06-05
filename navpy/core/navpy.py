@@ -920,7 +920,7 @@ def ecef2lla(ecef, latlon_unit='deg'):
         Rew,Rns = earthrad(lat,lat_unit='rad')
         h = p/np.cos(lat) - Rew
         
-        err = np.arctan2(z*(1+wgs84._ecc_sqrd*Rew*np.sin(lat)/z),p) - lat
+        err = np.arctan2(z+wgs84._ecc_sqrd*Rew*np.sin(lat),p) - lat
         
         lat = lat + err
     
