@@ -126,7 +126,7 @@ class TestNavClass(unittest.TestCase):
         LLA = [0, 0 ,0], ECEF = [6378137. , 0., 0.]
         """
         lat = 0.; lon = 0.; alt = 0.;
-        ecef = np.array([6378137. , 0., 0.])
+        ecef = np.array([navpy.wgs84.a, 0., 0.])
         
         lla_computed = navpy.ecef2lla(ecef)
         
