@@ -903,11 +903,9 @@ def ecef2lla(ecef, latlon_unit='deg'):
     alt : {(N,)} array like altitude in meters
     """
     ecef,N = _input_check_Nx3(ecef)
-    if(N>1):
-        x = ecef[:,0]; y = ecef[:,1]; z = ecef[:,2]
-    else:
-        x = ecef[0]; y = ecef[1]; z = ecef[2]
-
+    ecef = ecef.reshape(N,3)
+    x = ecef[:,0]; y = ecef[:,1]; z = ecef[:,2]
+    
     lon = np.arctan2(y,x)
 
     # Iteration to get Latitude and Altitude
@@ -915,10 +913,15 @@ def ecef2lla(ecef, latlon_unit='deg'):
     lat = np.arctan2(z,p*(1-wgs84._ecc_sqrd))
 
     err = np.ones(N)
-
+    h = np.zeros(N)
     while(np.max(np.abs(err))>1e-10):
         Rew,Rns = earthrad(lat,lat_unit='rad')
-        h = p/np.cos(lat) - Rew
+        
+        idx = (np.pi/2*np.ones(N) - np.abs(lat)) > 1e-3
+        # For lat < 90 degrees
+        h[idx] = np.divide(p[idx],np.cos(lat[idx])) - Rew[idx]
+        # For lat == 90 degrees
+        h[~idx] = np.divide(z[~idx],np.sin(lat[~idx])) - (1-wgs84._ecc_sqrd)*Rew[~idx]
         
         err = np.arctan2(z+wgs84._ecc_sqrd*Rew*np.sin(lat),p) - lat
         
@@ -927,9 +930,10 @@ def ecef2lla(ecef, latlon_unit='deg'):
     if(latlon_unit=='deg'):
         lat = np.rad2deg(lat)
         lon = np.rad2deg(lon)
-
-    return lat, lon, h
-
+    if(N>1):
+        return lat, lon, h
+    else:
+        return lat[0], lon[0], h[0]
 
 def lla2ned(lat, lon, alt, lat_ref, lon_ref, alt_ref, latlon_unit='deg', alt_unit='m', model='wgs84'):
     """
