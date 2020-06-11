@@ -117,8 +117,65 @@ class TestNavClass(unittest.TestCase):
         
         for e1, e2 in zip(ecef_computed, ecef):
             self.assertAlmostEqual(e1, e2, places=3)
+            
+    
+    def test_ecef2lla_equator(self):
+        """
+        Test conversion of ECEF to LLA from the equator
+        
+        LLA = [0, 0 ,0], ECEF = [6378137. , 0., 0.]
+        """
+        lat = 0.; lon = 0.; alt = 0.;
+        ecef = np.array([navpy.wgs84.a , 0., 0.])
+        
+        lla_computed = navpy.ecef2lla(ecef)
+        
+        # Testing for higher precision for lat, lon
+        for e1, e2 in zip(lla_computed, [lat, lon]):
+            self.assertAlmostEqual(e1, e2, places=8)
 
-    def test_lla2ecef_Ausralia(self):
+        # Two digits of precision for alt (i.e. cm)
+        self.assertAlmostEqual(lla_computed[2], alt, places=2)
+        
+    def test_ecef2lla_northpole(self):
+        """
+        Test conversion of ECEF to LLA from the equator
+        
+        LLA = [90, 0 ,100]
+        """
+        lat = 90.; lon = 0.; alt = 100.;
+        b = navpy.wgs84.a*np.sqrt(1-navpy.wgs84._ecc_sqrd) # Semi-minor axis
+        ecef = np.array([0. , 0., b+alt])
+        
+        lla_computed = navpy.ecef2lla(ecef)
+        
+        # Testing for higher precision for lat, lon
+        for e1, e2 in zip(lla_computed, [lat, lon]):
+            self.assertAlmostEqual(e1, e2, places=8)
+
+        # Two digits of precision for alt (i.e. cm)
+        self.assertAlmostEqual(lla_computed[2], alt, places=2)
+        
+    def test_ecef2lla_southpole(self):
+        """
+        Test conversion of ECEF to LLA from the equator
+        
+        LLA = [90, 0 ,100]
+        """
+        lat = -90.; lon = 0.; alt = 30.;
+        b = navpy.wgs84.a*np.sqrt(1-navpy.wgs84._ecc_sqrd) # Semi-minor axis
+        ecef = np.array([0. , 0., -(b+alt)])
+        
+        lla_computed = navpy.ecef2lla(ecef)
+        
+        # Testing for higher precision for lat, lon
+        for e1, e2 in zip(lla_computed, [lat, lon]):
+            self.assertAlmostEqual(e1, e2, places=8)
+
+        # Two digits of precision for alt (i.e. cm)
+        self.assertAlmostEqual(lla_computed[2], alt, places=2)
+
+    def test_lla2ecef_Australia(self):
         """
         Test conversion of LLA to ECEF.
         
@@ -143,7 +200,7 @@ class TestNavClass(unittest.TestCase):
         for e1, e2 in zip(ecef_computed, ecef):
             self.assertAlmostEqual(e1, e2, places=2)    
 
-    def test_ecef2lla_Ausralia(self):
+    def test_ecef2lla_Australia(self):
         """
         Test conversion of ECEF to LLA.
         
