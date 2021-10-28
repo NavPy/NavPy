@@ -41,6 +41,12 @@ def angle2dcm(rotAngle1, rotAngle2, rotAngle3, input_unit='rad',
     Returns
     --------
     C : {3x3} Direction Cosine Matrix
+        
+    Examples
+    --------
+    >>> import navpy
+    >>> # Returns the direction matrix for a yaw rotation of 90 degrees (0,0,90)
+    >>> dcm_matrix = navpy.angle2dcm(0, 0, 90, input_unit="deg")
 
     Notes
     -----
@@ -1121,9 +1127,12 @@ def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='
     
     Examples
     --------
-    >>> import numpy as np
-    >>> from navpy import ecef2ned
-    >>> lat 
+    >>> import navpy
+    >>> # Picking (32.0189, -120.7519, 100) as the referece for NED system
+    >>> reference_lla = (32.0189, -120.7519, 100)
+    >>> example_lla = (32.0189, -120.7720, 200) # picking a point east of the reference lla with 100m altitude difference
+    >>> ned = navpy.ecef2ned(example_lla, reference_lla[0], reference_lla[1], reference_lla[2], latlon_unit="deg", alt_unit="m")
+    >>> # ned contains a list with N, E, D coordinates of the points `example_lla` wrt 'reference_lla' as origin.
     """
     lat_ref,N1 = _input_check_Nx1(lat_ref)
     lon_ref,N2 = _input_check_Nx1(lon_ref)
