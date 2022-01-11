@@ -41,6 +41,16 @@ def angle2dcm(rotAngle1, rotAngle2, rotAngle3, input_unit='rad',
     Returns
     --------
     C : {3x3} Direction Cosine Matrix
+        
+    Examples
+    --------
+    This example returns a direction matrix for a yaw rotation of 90 degrees
+    >>> import navpy
+    >>> yaw_dcm_matrix = navpy.angle2dcm(90, 0, 0, input_unit="deg")
+    >>> print(yaw_dcm_matrix)
+    array([[ 6.123234e-17,  1.000000e+00,  0.000000e+00],
+       [-1.000000e+00,  6.123234e-17,  0.000000e+00],
+       [ 0.000000e+00,  0.000000e+00,  1.000000e+00]])
 
     Notes
     -----
@@ -1121,9 +1131,24 @@ def ecef2ned(ecef,lat_ref,lon_ref,alt_ref,latlon_unit='deg',alt_unit='m',model='
     
     Examples
     --------
-    >>> import numpy as np
-    >>> from navpy import ecef2ned
-    >>> lat 
+    Picking a reference point and then picking an example point 100m above it.
+    Converting the example point to ECEF and then to NED.
+    Note how the down coordinate does not directly correspond to z-axis or 
+    altitude difference directly.
+    
+    >>> import navpy
+    >>> reference_lla = [32.0189, -120.7720, 100]
+    >>>
+    >>> # picking a point near reference_lla with 100m altitude difference
+    >>> example_lla = [32.0189, -120.7720, 200]
+    >>>
+    >>> # Converting both to ECEF Frame
+    >>> example_ecef = navpy.lla2ecef(example_lla[0], example_lla[1], example_lla[2],latlon_unit='deg', alt_unit='m', model='wgs84')
+    >>> print(example_ecef)
+    >>>
+    >>> # Now converting ECEF to NED Frame
+    >>> example_ned = navpy.ecef2ned(example_ecef, reference_lla[0], reference_lla[1], reference_lla[2], latlon_unit='deg', alt_unit='m', model='wgs84')
+    >>> print(example_ned)
     """
     lat_ref,N1 = _input_check_Nx1(lat_ref)
     lon_ref,N2 = _input_check_Nx1(lon_ref)
