@@ -1206,6 +1206,6 @@ def wrapToPi(e):
     """
     dum,N = _input_check_Nx1(e)
     
-    ew = np.arctan2(np.sin(x), np.cos(x))
+    ew = np.arctan2(np.sin(e), np.cos(e))
 
     return ew
